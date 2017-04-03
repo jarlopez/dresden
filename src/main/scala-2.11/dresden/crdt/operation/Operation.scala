@@ -1,7 +1,6 @@
 package dresden.crdt.operation
 
 import dresden.crdt.Cursor
-import dresden.crdt.operation.Operation.TS
 
 /*
     op(
