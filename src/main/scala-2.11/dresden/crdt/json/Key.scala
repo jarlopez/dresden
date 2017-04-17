@@ -1,4 +1,4 @@
-package dresden.crdt
+package dresden.crdt.json
 
 case class Key()
 

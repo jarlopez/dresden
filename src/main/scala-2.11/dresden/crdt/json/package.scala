@@ -1,6 +1,6 @@
-package dresden
+package dresden.crdt
 
-package object crdt {
+package object json {
     // Project-wide typedefs
     type ReplicaId = String
 }

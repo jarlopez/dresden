@@ -1,4 +1,5 @@
-package dresden.crdt
+package dresden.crdt.json
+
 /*
     cursor(<k_1, . . . , k_n−1>, k_n)
  */

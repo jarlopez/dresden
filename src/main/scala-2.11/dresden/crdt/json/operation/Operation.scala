@@ -1,6 +1,6 @@
 package dresden.crdt.operation
 
-import dresden.crdt.Cursor
+import dresden.crdt.json.Cursor
 
 /*
     op(
