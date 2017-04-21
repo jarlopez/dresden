@@ -1,6 +1,7 @@
 package dresden.util
 
-import dresden.networking.KAddress
+import se.sics.ktoolbox.util.network.KAddress
+
 
 case class VectorClock(var vc: Map[KAddress, Int]) {
 

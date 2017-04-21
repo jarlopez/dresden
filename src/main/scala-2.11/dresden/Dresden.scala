@@ -8,7 +8,7 @@ import se.sics.kompics.timer.Timer
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
-import se.sics.ktoolbox.util.network.{KAddress, KContentMsg}
+import se.sics.ktoolbox.util.network.{KAddress, KContentMsg, KHeader}
 import template.kth.app.test.{Ping, Pong}
 
 class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLogging {
@@ -21,7 +21,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     }
 
     ctrl uponEvent {
-        case Start => handle {
+        case _: Start => handle {
             logger.info("Starting Dresden application")
         }
     }
@@ -33,8 +33,10 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
                 import scala.collection.JavaConversions._
                 val samples = sample.privateSample.values().map {it => it.getSource }
                 samples.foreach { peer: KAddress =>
-                    val header = new BasicHeader(self, peer, Transport.UDP)
-                    val msg = new BasicContentMsg(header, new Ping())
+//                    val header: KHeader[_] = new BasicHeader(self, peer, Transport.UDP)
+//                    val msg: KContentMsg[_, KHeader[_], Ping] = new BasicContentMsg(header, new Ping())
+                    val header = new BasicHeader[KAddress](self, peer, Transport.UDP)
+                    val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)
                     trigger(msg -> network)
                 }
             }
@@ -42,11 +44,12 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     }
 
     network uponEvent {
+        // TODO Fix this
         case msg: KContentMsg[_, _, Ping] => handle {
             logger.info(s"Received ping from ${msg.getHeader.getSource}")
             trigger(msg.answer(new Pong()) -> network)
         }
-        case msg: KContentMsg[_, _, Pong] => handle {
+        case msg: KContentMsg[_, KHeader[_], Pong] => handle {
             logger.info(s"Received pong from ${msg.getHeader.getSource}")
         }
     }

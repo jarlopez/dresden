@@ -3,13 +3,11 @@ package dresden.components.broadcast
 import java.util
 
 import dresden.components.Ports.{GBEB_Broadcast, GossippingBestEffortBroadcast, PerfectLink}
-import dresden.networking.KAddress
-import se.sics.kompics.network.{Network, Transport}
+import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
-import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
-import se.sics.ktoolbox.util.network.{KAddress, KHeader}
+import se.sics.ktoolbox.util.network.KAddress
 
 
 
@@ -38,14 +36,16 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
         case croupierSample: CroupierSample[_] => handle {
             if (!croupierSample.publicSample.isEmpty) {
                 val nodes = new util.LinkedList[KAddress]()
-                for (addr: KAddress <- croupierSample.publicSample.values()) {
-                    nodes.add(addr)
-                }
-                for (peer <- nodes) {
-                    val header = new BasicHeader[_ <: KAddress](self, peer, Transport.UDP)
-                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header,)
-                    trigger(msg -> network)
-                }
+//                for (addr: KAddress <- croupierSample.publicSample.values()) {
+//                    nodes.add(addr)
+//                }
+
+//                for (peer <- nodes) {
+                    // TODO XXX
+//                    val header = new BasicHeader[_ <: KAddress](self, peer, Transport.UDP)
+//                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header,)
+//                    trigger(msg -> network)
+//                }
 
 
                 //                val sample = CroupierHelper.getSample(croupierSample)

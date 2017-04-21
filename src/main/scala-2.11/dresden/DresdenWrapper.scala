@@ -12,7 +12,7 @@ import se.sics.ktoolbox.overlaymngr.events.OMngrCroupier
 import se.sics.ktoolbox.util.identifiable.overlay.OverlayId
 import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdate.Indication
-import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
+import se.sics.ktoolbox.util.overlays.view.{OverlayViewUpdate, OverlayViewUpdatePort}
 import template.kth.croupier.util.NoView
 
 
@@ -36,13 +36,13 @@ class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition wit
     }
 
     overlayManager uponEvent {
-        case OMngrCroupier.ConnectResponse => handle {
+        case ev: OMngrCroupier.ConnectResponse => handle {
             logger.info("Overlays connected")
             connectApp()
             app match {
                 case Some(mainApp) =>
                     trigger(Start.event -> mainApp.control())
-                    trigger(new Indication[_](croupierId, false, new NoView()) -> ext.viewUpdate)
+                    trigger(new OverlayViewUpdate.Indication[NoView](croupierId, false, new NoView), ext.viewUpdate)
                 case None =>
                     logger.error("Application component does not exist. Exiting")
                     throw new RuntimeException("Application component is None")

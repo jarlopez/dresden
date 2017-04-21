@@ -1,7 +1,7 @@
 package dresden.crdt.set
 
 import dresden.crdt.{CRDT, CRDTManager}
-import dresden.networking.KAddress
+import se.sics.ktoolbox.util.network.KAddress
 
 case class AddOperation(e: Any)
 case class QueryOperation(e: Any)

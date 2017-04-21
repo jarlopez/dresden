@@ -1,11 +1,11 @@
 package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.{Dresden, DresdenWrapper}
-import se.sics.kompics.{Channel, Component, Start}
+import dresden.DresdenWrapper
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
+import se.sics.kompics.{Channel, Component, Start}
 import se.sics.ktoolbox.cc.heartbeat.CCHeartbeatPort
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapClientComp
@@ -16,6 +16,10 @@ import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
 
 class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLogging {
+
+    def this(init: SimHostInit) {
+        this(new Init[SimHost](init.selfAdr, init.bootstrapServer, init.croupierId))
+    }
 
     val timer = requires[Timer]
     val network = requires[Network]
@@ -28,21 +32,24 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
         case Init(s: KAddress, bs: KAddress, c: OverlayId) => (s, bs, c)
     }
 
-
     ctrl uponEvent {
-        case Start => handle {
+        case _: Start => handle {
             logger.info("Starting simulation host")
             createBootstrapClient()
             createOverlayManager()
             createApp()
 
+            // TODO Is this needed?
+            trigger(Start.event -> bootstrapClient.get.control)
+            trigger(Start.event -> overlayManager.get.control)
+            trigger(Start.event -> dresden.get.control)
         }
     }
 
-    def createBootstrapClient(): Channel[Network] = {
-        bootstrapClient = Some(create(classOf[BootstrapClientComp], Init[BootstrapClientComp]()))
-        connect[Timer](timer -> bootstrapClient.get)
-        connect[Network](network -> bootstrapClient.get)
+    def createBootstrapClient(): Unit = {
+        bootstrapClient = Some(create(classOf[BootstrapClientComp], new BootstrapClientComp.Init(self, bootstrap)))
+        connect(bootstrapClient.get.getNegative(classOf[Timer]), timer, Channel.TWO_WAY)
+        connect(bootstrapClient.get.getNegative(classOf[Network]), network, Channel.TWO_WAY)
     }
 
     def createOverlayManager(): Unit = {
@@ -59,7 +66,7 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
     }
 
     def createApp(): Unit = {
-        val extPorts = new DresdenWrapper.ExtPort(
+        val extPorts = DresdenWrapper.ExtPort(
             timer,
             network,
             overlayManager.get.getPositive(classOf[CroupierPort]),
@@ -69,4 +76,7 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
         connect[OverlayMngrPort](overlayManager.get -> dresden.get)
     }
 
+
 }
+
+class SimHostInit(val selfAdr: KAddress, val bootstrapServer: KAddress, val croupierId: OverlayId) extends se.sics.kompics.Init[SimHost]

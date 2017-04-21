@@ -27,8 +27,8 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
+import sim.SimWrapper;
 import template.kth.sim.compatibility.SimNodeIdExtractor;
-import template.kth.system.HostMngrComp;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,12 +98,12 @@ public class ScenarioGen {
 
                 @Override
                 public Class getComponentDefinition() {
-                    return HostMngrComp.class;
+                    return SimWrapper.class;
                 }
 
                 @Override
-                public HostMngrComp.Init getComponentInit() {
-                    return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
+                public SimWrapper.Init getComponentInit() {
+                    return new SimWrapper.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
                 }
 
                 @Override
