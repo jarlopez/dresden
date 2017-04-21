@@ -1,8 +1,8 @@
 package dresden.components.broadcast
 
 import dresden.components.Ports._
-import dresden.networking.NetAddress
 import se.sics.kompics.sl._
+import se.sics.ktoolbox.util.network.KAddress
 
 class BasicBroadcast(init: Init[BasicBroadcast]) extends ComponentDefinition {
 
@@ -11,7 +11,7 @@ class BasicBroadcast(init: Init[BasicBroadcast]) extends ComponentDefinition {
     val beb = provides[BestEffortBroadcast]
 
     val (self, topology) = init match {
-        case Init(s: NetAddress, t: Set[NetAddress]@unchecked) => (s, t)
+        case Init(s: KAddress, t: Set[KAddress]@unchecked) => (s, t)
     }
 
     beb uponEvent {

@@ -4,7 +4,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import java.util
 
 import com.typesafe.scalalogging.LazyLogging
-import dresden.networking.NetAddress
+import dresden.networking.KAddress
 import se.sics.kompics.config.{Conversions, Converter}
 
 /**
@@ -14,16 +14,16 @@ import se.sics.kompics.config.{Conversions, Converter}
   * To register:
   *     Conversions.register(TAddressConverter);
   */
-class NetAddressConverter extends Converter[NetAddress] with LazyLogging {
+class NetAddressConverter extends Converter[KAddress] with LazyLogging {
 
-    override def convert(o: Object): NetAddress = {
+    override def convert(o: Object): KAddress = {
         o match {
             case m: util.Map[String, Any]@unchecked => {
                 try {
                     val hostname = Conversions.convert(m.get("host"), classOf[String])
                     val port = Conversions.convert(m.get("port"), classOf[Integer])
                     val ip = InetAddress.getByName(hostname)
-                    return NetAddress(new InetSocketAddress(ip, port))
+                    return KAddress(new InetSocketAddress(ip, port))
                 } catch {
                     case ex: Throwable =>
                         logger.error(s"Could not convert $m to TAddress", ex)
@@ -35,7 +35,7 @@ class NetAddressConverter extends Converter[NetAddress] with LazyLogging {
                     val ipPort = s.split(":")
                     val ip = InetAddress.getByName(ipPort(0))
                     val port = Integer.parseInt(ipPort(1))
-                    return NetAddress(new InetSocketAddress(ip, port))
+                    return KAddress(new InetSocketAddress(ip, port))
                 } catch {
                     case ex: Throwable =>
                         logger.error(s"Could not convert '$s' to TAddress", ex)
@@ -47,8 +47,8 @@ class NetAddressConverter extends Converter[NetAddress] with LazyLogging {
         null
     }
 
-    override def `type`(): Class[NetAddress] = {
-        classOf[NetAddress]
+    override def `type`(): Class[KAddress] = {
+        classOf[KAddress]
     }
 
 }

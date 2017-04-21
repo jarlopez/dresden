@@ -1,14 +1,14 @@
 package dresden.components
 
-import dresden.networking.NetAddress
 import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl.Port
+import se.sics.ktoolbox.util.network.KAddress
 
 object Ports {
 
     // Perfect Link
-    case class PL_Deliver(src: NetAddress, payload: KompicsEvent) extends KompicsEvent
-    case class PL_Send(dest: NetAddress, payload: KompicsEvent) extends KompicsEvent
+    case class PL_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+    case class PL_Send(dest: KAddress, payload: KompicsEvent) extends KompicsEvent
 
     class PerfectLink extends Port {
         indication[PL_Deliver]
@@ -16,7 +16,7 @@ object Ports {
     }
 
     // Best-Effort Broadcast
-    case class BEB_Deliver(src: NetAddress, payload: KompicsEvent) extends KompicsEvent
+    case class BEB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
     case class BEB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class BestEffortBroadcast extends Port {
@@ -24,8 +24,17 @@ object Ports {
         request[BEB_Broadcast]
     }
 
+    // Best-Effort Broadcast
+    case class GBEB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+    case class GBEB_Broadcast(payload: KompicsEvent) extends KompicsEvent
+
+    class GossippingBestEffortBroadcast extends Port {
+        indication[GBEB_Deliver]
+        request[GBEB_Broadcast]
+    }
+
     //  Reliable Broadcast
-    case class RB_Deliver(src: NetAddress, payload: KompicsEvent) extends KompicsEvent
+    case class RB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
     case class RB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class ReliableBroadcast extends Port {
@@ -34,7 +43,7 @@ object Ports {
     }
 
     // Causal-Order Reliable Broadcast
-    case class CRB_Deliver(src: NetAddress, payload: KompicsEvent) extends KompicsEvent
+    case class CRB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
     case class CRB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class CausalOrderReliableBroadcast extends Port {

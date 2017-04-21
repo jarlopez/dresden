@@ -1,42 +1,30 @@
 package dresden.crdt.set
 
-import scala.collection.mutable
+import dresden.crdt.{CRDT, CRDTManager}
+import dresden.networking.KAddress
 
-/* State-based grow-only Set (G-Set)
+case class AddOperation(e: Any)
+case class QueryOperation(e: Any)
 
-1   payload set A
-2       initial ∅
-3   update add (element e)
-4       A := A ∪ {e}
-5   query lookup (element e) : boolean b
-6       let b = (e ∈ A)
+case class GSet[T](entries: Set[T] = Set.empty[T]) extends CRDT {
 
-7   compare (S, T) : boolean b
-8       let b = (S.A ⊆ T.A)
-9   merge (S, T) : payload U
-10      let U.A = S.A ∪ T.A
-
-*/
-class GSet {
-    private val payload:mutable.HashSet[Any] = mutable.HashSet[Any]()
-
-    def add(e: Any): Unit = {
-        payload add e
+    def add(e: T): Unit = {
+        copy(entries = entries + e)
     }
 
-    def query(e: Any): Boolean = {
-        payload contains e
+    def query(e: T): Boolean = {
+        entries contains e
     }
 }
 
 object GSet {
-    def compare(S: GSet, T:GSet): Boolean = {
-        S.payload subsetOf T.payload
-    }
-
-    def merge(S: GSet, T:GSet): GSet = {
-        val rv = new GSet
-        rv.payload ++= S.payload union T.payload
-        rv
+    def apply[T]: GSet[T] = {
+        new GSet[T]()
     }
 }
+
+class GSetManager[T](id: String, host: KAddress) extends CRDTManager[GSet[T]] {
+    private var crdt: GSet[T] = GSet.apply[T]
+
+}
+

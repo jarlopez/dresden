@@ -1,19 +1,19 @@
 package dresden.components.broadcast
 
 import dresden.components.Ports._
-import dresden.networking.NetAddress
 import se.sics.kompics.sl.{Init, _}
 import se.sics.kompics.{KompicsEvent, ComponentDefinition => _, Port => _}
+import se.sics.ktoolbox.util.network.KAddress
 
-case class OriginatedData(src: NetAddress, payload: KompicsEvent) extends KompicsEvent
+case class OriginatedData(src: KAddress, payload: KompicsEvent) extends KompicsEvent
 
 class EagerReliableBroadcast(init: Init[EagerReliableBroadcast]) extends ComponentDefinition {
 
     val beb = requires[BestEffortBroadcast]
     val rb = provides[ReliableBroadcast]
 
-    val self: NetAddress = init match {
-        case Init(s: NetAddress) => s
+    val self: KAddress = init match {
+        case Init(s: KAddress) => s
     }
 
     private var delivered = collection.mutable.Set[KompicsEvent]()

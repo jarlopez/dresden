@@ -1,14 +1,14 @@
 package dresden.util
 
-import dresden.networking.NetAddress
+import dresden.networking.KAddress
 
-case class VectorClock(var vc: Map[NetAddress, Int]) {
+case class VectorClock(var vc: Map[KAddress, Int]) {
 
-    def inc(addr: NetAddress) = {
+    def inc(addr: KAddress) = {
         vc = vc + ((addr, vc.get(addr).get + 1))
     }
 
-    def set(addr: NetAddress, value: Int) = {
+    def set(addr: KAddress, value: Int) = {
         vc = vc + ((addr, value))
     }
 
@@ -18,8 +18,8 @@ case class VectorClock(var vc: Map[NetAddress, Int]) {
 
 object VectorClock {
 
-    def empty(topology: scala.Seq[NetAddress]): VectorClock = {
-        VectorClock(topology.foldLeft[Map[NetAddress, Int]](Map[NetAddress, Int]())((mp, addr) => mp + ((addr, 0))))
+    def empty(topology: scala.Seq[KAddress]): VectorClock = {
+        VectorClock(topology.foldLeft[Map[KAddress, Int]](Map[KAddress, Int]())((mp, addr) => mp + ((addr, 0))))
     }
 
     def apply(that: VectorClock): VectorClock = {

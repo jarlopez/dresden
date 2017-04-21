@@ -1,9 +1,10 @@
 package dresden.components.links
 
 import dresden.components.Ports.{PL_Deliver, PL_Send, PerfectLink}
-import dresden.networking.{NetAddress, NetMessage}
+import dresden.networking.NetMessage
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
+import se.sics.ktoolbox.util.network.KAddress
 
 object PerfectP2PLink {
 
@@ -16,8 +17,8 @@ class PerfectP2PLink(init: Init[PerfectP2PLink]) extends ComponentDefinition {
     val pLink = provides[PerfectLink]
     val network = requires[Network]
 
-    val self: NetAddress = init match {
-        case Init(self: NetAddress) => self
+    val self: KAddress = init match {
+        case Init(self: KAddress) => self
     }
 
     pLink uponEvent {

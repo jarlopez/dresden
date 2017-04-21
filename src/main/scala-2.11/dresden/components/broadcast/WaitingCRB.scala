@@ -1,10 +1,10 @@
 package dresden.components.broadcast
 
 import dresden.components.Ports._
-import dresden.networking.NetAddress
 import dresden.util.VectorClock
 import se.sics.kompics.sl.{Init, _}
 import se.sics.kompics.{KompicsEvent, ComponentDefinition => _, Port => _}
+import se.sics.ktoolbox.util.network.KAddress
 
 import scala.collection.mutable.ListBuffer
 
@@ -16,10 +16,10 @@ class WaitingCRB(init: Init[WaitingCRB]) extends ComponentDefinition {
     val crb = provides[CausalOrderReliableBroadcast]
 
     val (self, vec) = init match {
-        case Init(s: NetAddress, t: Set[NetAddress]@unchecked) => (s, VectorClock.empty(t.toSeq))
+        case Init(s: KAddress, t: Set[KAddress]@unchecked) => (s, VectorClock.empty(t.toSeq))
     }
 
-    var pending: ListBuffer[(NetAddress, DataMessage)] = ListBuffer()
+    var pending: ListBuffer[(KAddress, DataMessage)] = ListBuffer()
     var lsn = 0
 
 
@@ -33,7 +33,7 @@ class WaitingCRB(init: Init[WaitingCRB]) extends ComponentDefinition {
     }
 
     rb uponEvent {
-        case RB_Deliver(src: NetAddress, msg: DataMessage) => handle {
+        case RB_Deliver(src: KAddress, msg: DataMessage) => handle {
             pending += ((src, msg))
             for (it@(address, message) <- pending.sortWith(_._2.timestamp <= _._2.timestamp)) {
                 if (message.timestamp <= vec) {

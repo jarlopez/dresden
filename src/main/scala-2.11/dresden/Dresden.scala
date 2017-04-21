@@ -1,40 +1,53 @@
 package dresden
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.networking.NetAddress
-import dresden.util.converters.NetAddressConverter
-import se.sics.kompics.config.Conversions
-import se.sics.kompics.network.netty.{NettyInit, NettyNetwork}
+import se.sics.kompics.Start
+import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
-import se.sics.kompics.timer.java.JavaTimer
-import se.sics.kompics.{Component, Kompics, Start}
+import se.sics.kompics.timer.Timer
+import se.sics.ktoolbox.croupier.CroupierPort
+import se.sics.ktoolbox.croupier.event.CroupierSample
+import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
+import se.sics.ktoolbox.util.network.{KAddress, KContentMsg}
+import template.kth.app.test.{Ping, Pong}
 
-object Dresden {
+class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLogging {
+    val timer = requires[Timer]
+    val network = requires[Network]
+    val croupier = requires[CroupierPort]
 
-    Conversions.register(new NetAddressConverter())
-
-    def main(args: Array[String]): Unit = {
-        try {
-            Kompics.createAndStart(classOf[Dresden])
-            Kompics.waitForTermination()
-        } catch {
-            case ex: Throwable =>
-                ex.printStackTrace()
-        }
+    private val self = init match {
+        case Init(s: KAddress) => s
     }
-}
-
-class Dresden extends ComponentDefinition with StrictLogging {
-
-    val self: NetAddress = cfg.getValue[NetAddress]("dresden.address")
-
-    val timer: Component = create(classOf[JavaTimer], Init.NONE)
-    val network: Component = create(classOf[NettyNetwork], new NettyInit(self))
 
     ctrl uponEvent {
-        case _: Start => handle {
-            logger.debug("Started Dresden")
+        case Start => handle {
+            logger.info("Starting Dresden application")
+        }
+    }
+
+    croupier uponEvent {
+        case sample: CroupierSample[_] => handle {
+            if (!sample.privateSample.isEmpty) {
+                logger.info("Handling croupier sample")
+                import scala.collection.JavaConversions._
+                val samples = sample.privateSample.values().map {it => it.getSource }
+                samples.foreach { peer: KAddress =>
+                    val header = new BasicHeader(self, peer, Transport.UDP)
+                    val msg = new BasicContentMsg(header, new Ping())
+                    trigger(msg -> network)
+                }
+            }
+        }
+    }
+
+    network uponEvent {
+        case msg: KContentMsg[_, _, Ping] => handle {
+            logger.info(s"Received ping from ${msg.getHeader.getSource}")
+            trigger(msg.answer(new Pong()) -> network)
+        }
+        case msg: KContentMsg[_, _, Pong] => handle {
+            logger.info(s"Received pong from ${msg.getHeader.getSource}")
         }
     }
 }
-
