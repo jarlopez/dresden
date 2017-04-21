@@ -14,6 +14,7 @@ import se.sics.ktoolbox.util.identifiable.overlay.OverlayId
 import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
+import template.kth.app.mngr.AppMngrComp
 
 class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLogging {
 
@@ -40,9 +41,9 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
             createApp()
 
             // TODO Is this needed?
-            trigger(Start.event -> bootstrapClient.get.control)
-            trigger(Start.event -> overlayManager.get.control)
-            trigger(Start.event -> dresden.get.control)
+//            trigger(Start.event -> bootstrapClient.get.control)
+//            trigger(Start.event -> overlayManager.get.control)
+//            trigger(Start.event -> dresden.get.control)
         }
     }
 
@@ -54,6 +55,7 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
 
     def createOverlayManager(): Unit = {
         bootstrapClient match {
+            case None => // Shhh
             case Some(bsClient) =>
                 val extPorts = new OverlayMngrComp.ExtPort(
                     timer,
@@ -73,9 +75,9 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
             overlayManager.get.getNegative(classOf[OverlayViewUpdatePort])
         )
         dresden = Some(create(classOf[DresdenWrapper], new Init[DresdenWrapper](croupierId, self, extPorts)))
-        connect[OverlayMngrPort](overlayManager.get -> dresden.get)
+        connect(dresden.get.getNegative(classOf[OverlayMngrPort]), overlayManager.get.getPositive(classOf[OverlayMngrPort]), Channel.TWO_WAY)
+        //      connect[OverlayMngrPort](overlayManager.get -> dresden.get)
     }
-
 
 }
 

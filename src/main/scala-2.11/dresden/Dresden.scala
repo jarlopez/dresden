@@ -1,6 +1,7 @@
 package dresden
 
 import com.typesafe.scalalogging.StrictLogging
+import dresden.sim.{Ping, Pong}
 import se.sics.kompics.Start
 import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
@@ -9,7 +10,6 @@ import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
 import se.sics.ktoolbox.util.network.{KAddress, KContentMsg, KHeader}
-import template.kth.app.test.{Ping, Pong}
 
 class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLogging {
     val timer = requires[Timer]
@@ -28,29 +28,35 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
 
     croupier uponEvent {
         case sample: CroupierSample[_] => handle {
-            if (!sample.privateSample.isEmpty) {
+            if (!sample.publicSample.isEmpty) {
                 logger.info("Handling croupier sample")
                 import scala.collection.JavaConversions._
-                val samples = sample.privateSample.values().map {it => it.getSource }
+                val samples = sample.publicSample.values().map {it => it.getSource }
                 samples.foreach { peer: KAddress =>
-//                    val header: KHeader[_] = new BasicHeader(self, peer, Transport.UDP)
-//                    val msg: KContentMsg[_, KHeader[_], Ping] = new BasicContentMsg(header, new Ping())
                     val header = new BasicHeader[KAddress](self, peer, Transport.UDP)
                     val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)
                     trigger(msg -> network)
                 }
+            } else {
+                logger.debug("Empty croupier sample")
             }
         }
     }
 
     network uponEvent {
-        // TODO Fix this
-        case msg: KContentMsg[_, _, Ping] => handle {
-            logger.info(s"Received ping from ${msg.getHeader.getSource}")
-            trigger(msg.answer(new Pong()) -> network)
-        }
-        case msg: KContentMsg[_, KHeader[_], Pong] => handle {
-            logger.info(s"Received pong from ${msg.getHeader.getSource}")
+        case msg: BasicContentMsg[_, _, _] => handle {
+            val that = msg
+            val header = msg.getHeader
+            val content = msg.getContent
+            content match {
+                case x: Ping =>
+                    logger.info(s"A ping! $msg")
+                    trigger(msg.answer(new Pong) -> network)
+                case x: Pong =>
+                    logger.info(s"A pong! $msg")
+                case _ =>
+                    logger.info("Unknown!")
+            }
         }
     }
 }

@@ -17,6 +17,8 @@
  */
 package template.kth.app.sim;
 
+import dresden.sim.SimHost;
+import dresden.sim.SimHostInit;
 import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
@@ -27,98 +29,115 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
-import sim.SimWrapper;
 import template.kth.sim.compatibility.SimNodeIdExtractor;
+import template.kth.system.HostMngrComp;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Alex Ormenisan <aaor@kth.se>
- */
 public class ScenarioGen {
 
-    static Operation<SetupEvent> systemSetupOp = new Operation<SetupEvent>() {
+    static Operation<SetupEvent> systemSetupOp = (Operation<SetupEvent>) () -> new SetupEvent() {
         @Override
-        public SetupEvent generate() {
-            return new SetupEvent() {
-                @Override
-                public IdentifierExtractor getIdentifierExtractor() {
-                    return new SimNodeIdExtractor();
-                }
-            };
+        public IdentifierExtractor getIdentifierExtractor() {
+            return new SimNodeIdExtractor();
         }
     };
 
-    static Operation<StartNodeEvent> startBootstrapServerOp = new Operation<StartNodeEvent>() {
+    static Operation<StartNodeEvent> startBootstrapServerOp = (Operation<StartNodeEvent>) () -> new StartNodeEvent() {
+        KAddress selfAdr;
+
+        {
+            selfAdr = ScenarioSetup.bootstrapServer;
+        }
 
         @Override
-        public StartNodeEvent generate() {
-            return new StartNodeEvent() {
-                KAddress selfAdr;
+        public Address getNodeAddress() {
+            return selfAdr;
+        }
 
-                {
-                    selfAdr = ScenarioSetup.bootstrapServer;
-                }
+        @Override
+        public Class getComponentDefinition() {
+            return BootstrapServerComp.class;
+        }
 
-                @Override
-                public Address getNodeAddress() {
-                    return selfAdr;
-                }
+        @Override
+        public BootstrapServerComp.Init getComponentInit() {
+            return new BootstrapServerComp.Init(selfAdr);
+        }
+    };
+    static Operation1<StartNodeEvent, Integer> startNodeOp = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
+        KAddress selfAdr;
 
-                @Override
-                public Class getComponentDefinition() {
-                    return BootstrapServerComp.class;
-                }
+        {
+            String nodeIp = "193.0.0." + nodeId;
+            selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
+        }
 
-                @Override
-                public BootstrapServerComp.Init getComponentInit() {
-                    return new BootstrapServerComp.Init(selfAdr);
-                }
-            };
+        @Override
+        public Address getNodeAddress() {
+            return selfAdr;
+        }
+
+        @Override
+        public Class getComponentDefinition() {
+            return HostMngrComp.class;
+        }
+
+        @Override
+        public HostMngrComp.Init getComponentInit() {
+            return new HostMngrComp.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
+        }
+
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
         }
     };
 
-    static Operation1<StartNodeEvent, Integer> startNodeOp = new Operation1<StartNodeEvent, Integer>() {
+
+    static Operation1<StartNodeEvent, Integer> startScalaNodeOp = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
+        KAddress selfAdr;
+
+        {
+            String nodeIp = "193.0.0." + nodeId;
+            selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
+        }
 
         @Override
-        public StartNodeEvent generate(final Integer nodeId) {
-            return new StartNodeEvent() {
-                KAddress selfAdr;
+        public Address getNodeAddress() {
+            return selfAdr;
+        }
 
-                {
-                    String nodeIp = "193.0.0." + nodeId;
-                    selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
-                }
+        @Override
+        public Class getComponentDefinition() {
+            return SimHost.class;
+        }
 
-                @Override
-                public Address getNodeAddress() {
-                    return selfAdr;
-                }
+        @Override
+        public SimHostInit getComponentInit() {
+            return new SimHostInit(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
+        }
 
-                @Override
-                public Class getComponentDefinition() {
-                    return SimWrapper.class;
-                }
-
-                @Override
-                public SimWrapper.Init getComponentInit() {
-                    return new SimWrapper.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
-                }
-
-                @Override
-                public Map<String, Object> initConfigUpdate() {
-                    Map<String, Object> nodeConfig = new HashMap<>();
-                    nodeConfig.put("system.id", nodeId);
-                    nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
-                    nodeConfig.put("system.port", ScenarioSetup.appPort);
-                    return nodeConfig;
-                }
-            };
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
         }
     };
 
     public static SimulationScenario simpleBoot() {
+        return simpleBoot(false);
+    }
+
+    public static SimulationScenario simpleBoot(boolean useScala) {
         SimulationScenario scen = new SimulationScenario() {
             {
                 StochasticProcess systemSetup = new StochasticProcess() {
@@ -136,14 +155,18 @@ public class ScenarioGen {
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
                         eventInterArrivalTime(uniform(1000, 1100));
-                        raise(100, startNodeOp, new BasicIntSequentialDistribution(1));
+                        if (useScala) {
+                            raise(100, startScalaNodeOp, new BasicIntSequentialDistribution(1));
+                        } else {
+                            raise(100, startNodeOp, new BasicIntSequentialDistribution(1));
+                        }
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(1000*1000, startPeers);
+                terminateAfterTerminationOf(1000 * 1000, startPeers);
             }
         };
 
