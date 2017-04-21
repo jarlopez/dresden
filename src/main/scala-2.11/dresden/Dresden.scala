@@ -1,11 +1,14 @@
 package dresden
 
+import java.util.UUID
+
 import com.typesafe.scalalogging.StrictLogging
+import dresden.components.Ports.{GBEB_Broadcast, GossippingBestEffortBroadcast}
 import dresden.sim.{Ping, Pong}
 import se.sics.kompics.Start
 import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
-import se.sics.kompics.timer.Timer
+import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timeout, Timer}
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
@@ -15,6 +18,10 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     val timer = requires[Timer]
     val network = requires[Network]
     val croupier = requires[CroupierPort]
+    val gossip = requires[GossippingBestEffortBroadcast]
+
+    private var timerId: Option[UUID] = None
+    private val period: Long = 5000
 
     private val self = init match {
         case Init(s: KAddress) => s
@@ -23,6 +30,18 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     ctrl uponEvent {
         case _: Start => handle {
             logger.info("Starting Dresden application")
+            val spt = new SchedulePeriodicTimeout(0, period)
+            val timeout = DresdenTimeout(spt)
+            spt.setTimeoutEvent(timeout)
+            trigger(spt -> timer)
+            timerId = Some(timeout.getTimeoutId)
+        }
+    }
+
+    timer uponEvent {
+        case DresdenTimeout(_) => handle {
+            logger.info("Triggering gossip-Ping!")
+            trigger(GBEB_Broadcast(new Ping) -> gossip)
         }
     }
 
@@ -45,18 +64,26 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
 
     network uponEvent {
         case msg: BasicContentMsg[_, _, _] => handle {
-            val that = msg
-            val header = msg.getHeader
             val content = msg.getContent
             content match {
-                case x: Ping =>
+                case _: Ping =>
                     logger.info(s"A ping! $msg")
                     trigger(msg.answer(new Pong) -> network)
-                case x: Pong =>
+                case _: Pong =>
                     logger.info(s"A pong! $msg")
                 case _ =>
                     logger.info("Unknown!")
             }
         }
     }
+
+    override def tearDown(): Unit = {
+        timerId match {
+            case Some(id) =>
+                trigger(new CancelPeriodicTimeout(id) -> timer)
+            case None => // Nothing to do
+        }
+    }
 }
+
+case class DresdenTimeout(spt: SchedulePeriodicTimeout) extends Timeout(spt)

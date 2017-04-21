@@ -45,7 +45,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
         case PL_Deliver(p, HistoryRequest) => handle {
             trigger(PL_Send(p, HistoryResponse(past)) -> pp2p)
         }
-        case PL_Deliver(p, HistoryResponse(history)) => handle {
+        case PL_Deliver(_, HistoryResponse(history)) => handle {
             val unseen = history - past
             for ( (pp: KAddress, m: KompicsEvent) <- unseen) {
                 trigger(GBEB_Deliver(pp, m) -> gbeb)

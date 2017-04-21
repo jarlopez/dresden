@@ -2,6 +2,9 @@ package dresden
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.DresdenWrapper.ExtPort
+import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.broadcast.GossippingBasicBroadcast
+import dresden.components.links.PerfectP2PLink
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
@@ -18,10 +21,15 @@ import template.kth.croupier.util.NoView
 class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition with StrictLogging {
 
     val overlayManager: PositivePort[OverlayMngrPort] = requires[OverlayMngrPort]
+
     private val (croupierId, self, ext) = init match {
         case Init(crId: OverlayId, s: KAddress, e: ExtPort) =>
             (crId, s, e)
     }
+
+    val gossip = create(classOf[GossippingBasicBroadcast], new Init[GossippingBasicBroadcast](self))
+    val pp2p = create(classOf[PerfectP2PLink], new Init[PerfectP2PLink](self))
+
     private var app = None: Option[Component]
     private var croupierConnReq = None: Option[OMngrCroupier.ConnectRequest]
 
@@ -51,9 +59,24 @@ class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition wit
 
     def connectApp(): Unit = {
         app = Some(create(classOf[Dresden], Init[Dresden](self)))
-        connect(app.get.getNegative(classOf[Timer]), ext.timer, Channel.TWO_WAY)
-        connect(app.get.getNegative(classOf[Network]), ext.network, Channel.TWO_WAY)
-        connect(app.get.getNegative(classOf[CroupierPort]), ext.croupier, Channel.TWO_WAY)
+        app match {
+            case Some(dresden) =>
+                // Perfect link
+                connect(pp2p.getNegative(classOf[Network]), ext.network, Channel.TWO_WAY)
+
+                // Gossipping broadcast
+                connect[PerfectLink](pp2p -> gossip)
+                connect(gossip.getNegative(classOf[CroupierPort]), ext.croupier, Channel.TWO_WAY)
+
+                // App
+                connect(dresden.getNegative(classOf[Timer]), ext.timer, Channel.TWO_WAY)
+                connect(dresden.getNegative(classOf[Network]), ext.network, Channel.TWO_WAY)
+                connect(dresden.getNegative(classOf[CroupierPort]), ext.croupier, Channel.TWO_WAY)
+                connect[GossippingBestEffortBroadcast](gossip -> dresden)
+            case None =>
+                logger.error("Failed to create application. Exiting")
+                throw new RuntimeException("Application component is None")
+        }
     }
 }
 
