@@ -18,25 +18,13 @@ import template.kth.croupier.util.NoView
 class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition with StrictLogging {
 
     val overlayManager: PositivePort[OverlayMngrPort] = requires[OverlayMngrPort]
-//    val omngrPort = requires(classOf[OverlayMngrPort])
 
     private var app = None: Option[Component]
     private var croupierConnReq = None: Option[OMngrCroupier.ConnectRequest]
 
-    private val handleCroupierConnected: Handler[_ <: KompicsEvent] = new Handler[OMngrCroupier.ConnectResponse]() {
-        def handle(event: OMngrCroupier.ConnectResponse) {
-            logger.info("Overlays connected")
-            connectApp()
-            trigger(Start.event, app.get.control)
-            trigger(new OverlayViewUpdate.Indication[NoView](croupierId, false, new NoView), ext.viewUpdate)
-        }
-    }
-
     private val (croupierId, self, ext) = init match {
-        case Init(crId: OverlayId, s: KAddress, e: ExtPort) => {
-//            subscribe(handleCroupierConnected, omngrPort)
+        case Init(crId: OverlayId, s: KAddress, e: ExtPort) =>
             (crId, s, e)
-        }
     }
 
     ctrl uponEvent {
