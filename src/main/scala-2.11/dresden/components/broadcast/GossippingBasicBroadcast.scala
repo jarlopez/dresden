@@ -1,9 +1,8 @@
 package dresden.components.broadcast
 
-import java.util
 
-import dresden.components.Ports.{GBEB_Broadcast, GossippingBestEffortBroadcast, PerfectLink}
-import se.sics.kompics.network.Network
+import dresden.components.Ports._
+import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
@@ -15,13 +14,13 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 
     val gbeb = provides[GossippingBestEffortBroadcast]
 
-    val network = requires[Network]
     val pp2p = requires[PerfectLink]
     val bs = requires[BasicSample]
 
     val self = init match {
         case Init(s: KAddress) => s
     }
+
     private var past = Set.empty[Any]
 
     gbeb uponEvent {
@@ -33,9 +32,29 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
     bs uponEvent {
         case croupierSample: CroupierSample[_] => handle {
             if (!croupierSample.publicSample.isEmpty) {
-                val nodes = new util.LinkedList[KAddress]()
-
+                import collection.JavaConversions._
+                val peers = croupierSample.publicSample.values().map { it => it.getSource }
+                for (p: KAddress <- peers) {
+                    trigger(PL_Send(p, HistoryRequest) -> pp2p)
+                }
             }
         }
     }
+
+    pp2p uponEvent {
+        case PL_Deliver(p, HistoryRequest) => handle {
+            trigger(PL_Send(p, HistoryResponse(past)) -> pp2p)
+        }
+        case PL_Deliver(p, HistoryResponse(history)) => handle {
+            val unseen = history - past
+            for ( (pp: KAddress, m: KompicsEvent) <- unseen) {
+                trigger(GBEB_Deliver(pp, m) -> gbeb)
+            }
+            past = past union unseen
+        }
+
+    }
 }
+
+case object HistoryRequest extends KompicsEvent
+case class HistoryResponse(past: Set[Any]) extends KompicsEvent
