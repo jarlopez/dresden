@@ -28,11 +28,11 @@ import java.util.List;
  * @author Alex Ormenisan <aaor@kth.se>
  */
 public class CroupierHelper {
-  public static List<KAddress> getSample(CroupierSample<Boolean> sample) {
-    List<KAddress> s = new LinkedList<>();
-    for(AgingAdrContainer<KAddress, Boolean> e: sample.publicSample.values()) {
-      s.add(e.getSource());
+    public static List<KAddress> getSample(CroupierSample<Boolean> sample) {
+        List<KAddress> s = new LinkedList<>();
+        for (AgingAdrContainer<KAddress, Boolean> e : sample.publicSample.values()) {
+            s.add(e.getSource());
+        }
+        return s;
     }
-    return s;
-  }
 }

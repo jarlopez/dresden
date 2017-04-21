@@ -5,7 +5,7 @@ import dresden.DresdenWrapper.ExtPort
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
-import se.sics.kompics.{Handler, ComponentDefinition => _, Init => _, _}
+import se.sics.kompics.{ComponentDefinition => _, Init => _, _}
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.overlaymngr.OverlayMngrPort
 import se.sics.ktoolbox.overlaymngr.events.OMngrCroupier
@@ -18,14 +18,12 @@ import template.kth.croupier.util.NoView
 class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition with StrictLogging {
 
     val overlayManager: PositivePort[OverlayMngrPort] = requires[OverlayMngrPort]
-
-    private var app = None: Option[Component]
-    private var croupierConnReq = None: Option[OMngrCroupier.ConnectRequest]
-
     private val (croupierId, self, ext) = init match {
         case Init(crId: OverlayId, s: KAddress, e: ExtPort) =>
             (crId, s, e)
     }
+    private var app = None: Option[Component]
+    private var croupierConnReq = None: Option[OMngrCroupier.ConnectRequest]
 
     ctrl uponEvent {
         case _: Start => handle {
@@ -51,7 +49,6 @@ class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition wit
         }
     }
 
-
     def connectApp(): Unit = {
         app = Some(create(classOf[Dresden], Init[Dresden](self)))
         connect(app.get.getNegative(classOf[Timer]), ext.timer, Channel.TWO_WAY)
@@ -61,5 +58,7 @@ class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition wit
 }
 
 object DresdenWrapper {
+
     case class ExtPort(timer: Positive[Timer], network: Positive[Network], croupier: Positive[CroupierPort], viewUpdate: Negative[OverlayViewUpdatePort])
+
 }

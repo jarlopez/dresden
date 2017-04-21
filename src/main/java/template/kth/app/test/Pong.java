@@ -18,9 +18,8 @@
 package template.kth.app.test;
 
 /**
- *
  * @author Alex Ormenisan <aaor@kth.se>
  */
 public class Pong {
-    
+
 }

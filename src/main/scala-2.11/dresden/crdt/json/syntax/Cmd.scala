@@ -11,12 +11,19 @@ import dresden.crdt.syntax.Expr.Var
           | CMD; CMD
  */
 object Cmd {
+
     case class Let(x: Var, expression: Expr) extends Cmd
+
     case class Assignment(expression: Expr, value: Val) extends Cmd
+
     case class InsertAfter(expression: Expr, value: Val) extends Cmd
+
     case class Delete(expression: Expr) extends Cmd
+
     case class Yield(expression: Expr) extends Cmd
+
     case class Chain(c0: Cmd, c1: Cmd) extends Cmd
+
 }
 
 sealed trait Cmd

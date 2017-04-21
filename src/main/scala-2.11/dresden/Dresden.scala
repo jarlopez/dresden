@@ -9,7 +9,7 @@ import se.sics.kompics.timer.Timer
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
-import se.sics.ktoolbox.util.network.{KAddress, KContentMsg, KHeader}
+import se.sics.ktoolbox.util.network.{KAddress, KHeader}
 
 class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLogging {
     val timer = requires[Timer]
@@ -31,7 +31,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
             if (!sample.publicSample.isEmpty) {
                 logger.info("Handling croupier sample")
                 import scala.collection.JavaConversions._
-                val samples = sample.publicSample.values().map {it => it.getSource }
+                val samples = sample.publicSample.values().map { it => it.getSource }
                 samples.foreach { peer: KAddress =>
                     val header = new BasicHeader[KAddress](self, peer, Transport.UDP)
                     val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)

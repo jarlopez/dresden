@@ -10,7 +10,6 @@ import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.KAddress
 
 
-
 class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends ComponentDefinition {
     type BasicSample = CroupierPort
 
@@ -19,12 +18,10 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
     val network = requires[Network]
     val pp2p = requires[PerfectLink]
     val bs = requires[BasicSample]
-
-    private var past = Set.empty[Any]
-
     val self = init match {
         case Init(s: KAddress) => s
     }
+    private var past = Set.empty[Any]
 
     gbeb uponEvent {
         case x: GBEB_Broadcast => handle {
@@ -36,16 +33,16 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
         case croupierSample: CroupierSample[_] => handle {
             if (!croupierSample.publicSample.isEmpty) {
                 val nodes = new util.LinkedList[KAddress]()
-//                for (addr: KAddress <- croupierSample.publicSample.values()) {
-//                    nodes.add(addr)
-//                }
+                //                for (addr: KAddress <- croupierSample.publicSample.values()) {
+                //                    nodes.add(addr)
+                //                }
 
-//                for (peer <- nodes) {
-                    // TODO XXX
-//                    val header = new BasicHeader[_ <: KAddress](self, peer, Transport.UDP)
-//                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header,)
-//                    trigger(msg -> network)
-//                }
+                //                for (peer <- nodes) {
+                // TODO XXX
+                //                    val header = new BasicHeader[_ <: KAddress](self, peer, Transport.UDP)
+                //                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header,)
+                //                    trigger(msg -> network)
+                //                }
 
 
                 //                val sample = CroupierHelper.getSample(croupierSample)
@@ -55,12 +52,12 @@ for (e <- sample.publicSample.values)  { s.add(e.getSource)
 }
     return s
                  */
-//                import scala.collection.JavaConversions._
-//                for (peer <- sample) {
-//                    val header = new BasicHeader[_ <: KAddress](selfAdr, peer, Transport.UDP)
-//                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header, new Ping)
-//                    trigger(msg, networkPort)
-//                }
+                //                import scala.collection.JavaConversions._
+                //                for (peer <- sample) {
+                //                    val header = new BasicHeader[_ <: KAddress](selfAdr, peer, Transport.UDP)
+                //                    val msg = new BasicContentMsg[_ <: KAddress, _ <: KHeader[_ <: KAddress], _](header, new Ping)
+                //                    trigger(msg, networkPort)
+                //                }
             }
         }
     }

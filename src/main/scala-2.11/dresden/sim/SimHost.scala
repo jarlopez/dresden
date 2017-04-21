@@ -17,19 +17,17 @@ import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
 
 class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLogging {
 
-    def this(init: SimHostInit) {
-        this(new Init[SimHost](init.selfAdr, init.bootstrapServer, init.croupierId))
-    }
-
     val timer = requires[Timer]
     val network = requires[Network]
-
+    val (self, bootstrap, croupierId) = init match {
+        case Init(s: KAddress, bs: KAddress, c: OverlayId) => (s, bs, c)
+    }
     var bootstrapClient = None: Option[Component]
     var overlayManager = None: Option[Component]
     var dresden = None: Option[Component]
 
-    val (self, bootstrap, croupierId) = init match {
-        case Init(s: KAddress, bs: KAddress, c: OverlayId) => (s, bs, c)
+    def this(init: SimHostInit) {
+        this(new Init[SimHost](init.selfAdr, init.bootstrapServer, init.croupierId))
     }
 
     ctrl uponEvent {

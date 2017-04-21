@@ -8,6 +8,7 @@ object Ports {
 
     // Perfect Link
     case class PL_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+
     case class PL_Send(dest: KAddress, payload: KompicsEvent) extends KompicsEvent
 
     class PerfectLink extends Port {
@@ -17,6 +18,7 @@ object Ports {
 
     // Best-Effort Broadcast
     case class BEB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+
     case class BEB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class BestEffortBroadcast extends Port {
@@ -26,6 +28,7 @@ object Ports {
 
     // Best-Effort Broadcast
     case class GBEB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+
     case class GBEB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class GossippingBestEffortBroadcast extends Port {
@@ -35,6 +38,7 @@ object Ports {
 
     //  Reliable Broadcast
     case class RB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+
     case class RB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class ReliableBroadcast extends Port {
@@ -44,6 +48,7 @@ object Ports {
 
     // Causal-Order Reliable Broadcast
     case class CRB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
+
     case class CRB_Broadcast(payload: KompicsEvent) extends KompicsEvent
 
     class CausalOrderReliableBroadcast extends Port {

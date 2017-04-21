@@ -4,6 +4,7 @@ import dresden.crdt.{CRDT, CRDTManager}
 import se.sics.ktoolbox.util.network.KAddress
 
 case class AddOperation(e: Any)
+
 case class QueryOperation(e: Any)
 
 case class GSet[T](entries: Set[T] = Set.empty[T]) extends CRDT {

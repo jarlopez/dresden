@@ -39,11 +39,10 @@ import template.kth.app.mngr.AppMngrComp;
 public class HostMngrComp extends ComponentDefinition {
 
     private static final Logger LOG = LoggerFactory.getLogger(HostMngrComp.class);
-    private String logPrefix = " ";
-
     //*****************************CONNECTIONS**********************************
     Positive<Timer> timerPort = requires(Timer.class);
     Positive<Network> networkPort = requires(Network.class);
+    private String logPrefix = " ";
     //***************************EXTERNAL_STATE*********************************
     private KAddress selfAdr;
     private KAddress bootstrapServer;
@@ -52,18 +51,6 @@ public class HostMngrComp extends ComponentDefinition {
     private Component bootstrapClientComp;
     private Component overlayMngrComp;
     private Component appMngrComp;
-
-    public HostMngrComp(Init init) {
-        selfAdr = init.selfAdr;
-        logPrefix = "<nid:" + selfAdr.getId() + ">";
-        LOG.info("{}initiating...", logPrefix);
-
-        bootstrapServer = init.bootstrapServer;
-        croupierId = init.croupierId;
-
-        subscribe(handleStart, control);
-    }
-
     Handler handleStart = new Handler<Start>() {
         @Override
         public void handle(Start event) {
@@ -77,6 +64,17 @@ public class HostMngrComp extends ComponentDefinition {
             trigger(Start.event, appMngrComp.control());
         }
     };
+
+    public HostMngrComp(Init init) {
+        selfAdr = init.selfAdr;
+        logPrefix = "<nid:" + selfAdr.getId() + ">";
+        LOG.info("{}initiating...", logPrefix);
+
+        bootstrapServer = init.bootstrapServer;
+        croupierId = init.croupierId;
+
+        subscribe(handleStart, control);
+    }
 
     private void connectBootstrapClient() {
         bootstrapClientComp = create(BootstrapClientComp.class, new BootstrapClientComp.Init(selfAdr, bootstrapServer));
