@@ -26,16 +26,13 @@ class PerfectP2PLink(init: Init[PerfectP2PLink]) extends ComponentDefinition wit
     }
 
     network uponEvent {
+        // TODO Figure out how to extract payload types
         case msg: BasicContentMsg[_, _, _] => handle {
             val src = msg.getSource
             val content = msg.getContent
             content match {
-                case payload: KompicsEvent => {
+                case payload: KompicsEvent =>
                     trigger(PL_Deliver(src, payload) -> pLink)
-                }
-                case anything =>
-                    logger.warn(s"Unknown payload type $anything")
-
             }
         }
     }

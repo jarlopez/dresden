@@ -21,7 +21,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     val gossip = requires[GossippingBestEffortBroadcast]
 
     private var timerId: Option[UUID] = None
-    private val period: Long = 5000
+    private val period: Long = 5000 // TODO
 
     private val self = init match {
         case Init(s: KAddress) => s
@@ -63,6 +63,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     }
 
     network uponEvent {
+        // TODO Figure out how to 'extract' payload types without
         case msg: BasicContentMsg[_, _, _] => handle {
             val content = msg.getContent
             content match {
@@ -71,8 +72,6 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
                     trigger(msg.answer(new Pong) -> network)
                 case _: Pong =>
                     logger.info(s"A pong! $msg")
-                case _ =>
-                    logger.info("Unknown!")
             }
         }
     }
