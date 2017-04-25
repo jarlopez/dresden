@@ -63,7 +63,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     }
 
     network uponEvent {
-        // TODO Figure out how to 'extract' payload types without
+        // TODO Figure out how to 'extract' payload types without type erasure
         case msg: BasicContentMsg[_, _, _] => handle {
             val content = msg.getContent
             content match {
@@ -72,6 +72,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
                     trigger(msg.answer(new Pong) -> network)
                 case _: Pong =>
                     logger.info(s"A pong! $msg")
+                case _ => // Ignore
             }
         }
     }

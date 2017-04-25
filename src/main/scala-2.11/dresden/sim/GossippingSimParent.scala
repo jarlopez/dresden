@@ -15,19 +15,21 @@ import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
 
-class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLogging {
+class GossippingSimParent(init: Init[GossippingSimParent]) extends ComponentDefinition with StrictLogging {
 
     val timer = requires[Timer]
     val network = requires[Network]
+
     val (self, bootstrap, croupierId) = init match {
         case Init(s: KAddress, bs: KAddress, c: OverlayId) => (s, bs, c)
     }
+
     var bootstrapClient = None: Option[Component]
     var overlayManager = None: Option[Component]
     var dresden = None: Option[Component]
 
-    def this(init: SimHostInit) {
-        this(new Init[SimHost](init.selfAdr, init.bootstrapServer, init.croupierId))
+    def this(init: GossipSimInit) {
+        this(new Init[GossippingSimParent](init.selfAdr, init.bootstrapServer, init.croupierId))
     }
 
     ctrl uponEvent {
@@ -72,4 +74,4 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
 
 }
 
-class SimHostInit(val selfAdr: KAddress, val bootstrapServer: KAddress, val croupierId: OverlayId) extends se.sics.kompics.Init[SimHost]
+class GossipSimInit(val selfAdr: KAddress, val bootstrapServer: KAddress, val croupierId: OverlayId) extends se.sics.kompics.Init[SimHost]

@@ -1,24 +1,7 @@
-/*
- * 2016 Royal Institute of Technology (KTH)
- *
- * LSelector is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 package template.kth.app.sim;
 
-import dresden.sim.SimHost;
-import dresden.sim.SimHostInit;
+import dresden.sim.GossippingSimParent;
+import dresden.sim.GossipSimInit;
 import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
@@ -37,6 +20,7 @@ import java.util.Map;
 
 public class ScenarioGen {
 
+    // TODO Pull out common ones
     static Operation<SetupEvent> systemSetupOp = (Operation<SetupEvent>) () -> new SetupEvent() {
         @Override
         public IdentifierExtractor getIdentifierExtractor() {
@@ -66,6 +50,7 @@ public class ScenarioGen {
             return new BootstrapServerComp.Init(selfAdr);
         }
     };
+
     static Operation1<StartNodeEvent, Integer> startNodeOp = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
         KAddress selfAdr;
 
@@ -100,11 +85,12 @@ public class ScenarioGen {
     };
 
 
-    static Operation1<StartNodeEvent, Integer> startScalaNodeOp = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
+    static Operation1<StartNodeEvent, Integer> startGossipNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
         KAddress selfAdr;
 
         {
-            String nodeIp = "193.0.0." + nodeId;
+            // 193.0.0.1 is restricted to bootstrap node
+            String nodeIp = "194.0.0." + nodeId;
             selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
         }
 
@@ -115,12 +101,12 @@ public class ScenarioGen {
 
         @Override
         public Class getComponentDefinition() {
-            return SimHost.class;
+            return GossippingSimParent.class;
         }
 
         @Override
-        public SimHostInit getComponentInit() {
-            return new SimHostInit(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
+        public GossipSimInit getComponentInit() {
+            return new GossipSimInit(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
         }
 
         @Override
@@ -154,19 +140,16 @@ public class ScenarioGen {
                 };
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
-                        eventInterArrivalTime(uniform(1000, 1100));
-                        if (useScala) {
-                            raise(100, startScalaNodeOp, new BasicIntSequentialDistribution(1));
-                        } else {
-                            raise(100, startNodeOp, new BasicIntSequentialDistribution(1));
-                        }
+//                        eventInterArrivalTime(uniform(1000, 1100));
+                        eventInterArrivalTime(constant(1000));
+                        raise(3, startGossipNode, new BasicIntSequentialDistribution(1));
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(1000 * 1000, startPeers);
+                terminateAfterTerminationOf(1000 * 1000 * 3, startPeers);
             }
         };
 
