@@ -5,6 +5,7 @@ import java.util.UUID
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{GBEB_Broadcast, GBEB_Deliver, GossippingBestEffortBroadcast}
 import dresden.networking.{PingMessage, PongMessage}
+import dresden.sim.SimUtil
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timeout, Timer}
@@ -50,7 +51,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         sent += id
 
         import scala.collection.JavaConverters._
-        SimulationResultSingleton.getInstance().put(self.toString + "-sent", sent.asJava)
+        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
     }
 
     ctrl uponEvent {
@@ -80,7 +81,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
                 logger.info(s"$self received gossip $id")
 
                 import scala.collection.JavaConverters._
-                SimulationResultSingleton.getInstance().put(self.toString + "-recvd", received.asJava)
+                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR,  received.asJava)
             }
         }
         case anything => handle {

@@ -4,7 +4,6 @@ import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{GBEB_Broadcast, GossippingBestEffortBroadcast}
-import dresden.sim.{Ping, Pong}
 import se.sics.kompics.Start
 import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
@@ -40,8 +39,6 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
 
     timer uponEvent {
         case DresdenTimeout(_) => handle {
-            logger.info("Triggering gossip-Ping!")
-            trigger(GBEB_Broadcast(new Ping) -> gossip)
         }
     }
 
@@ -51,31 +48,31 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
                 logger.info("Handling croupier sample")
                 import scala.collection.JavaConversions._
                 val samples = sample.publicSample.values().map { it => it.getSource }
-                samples.foreach { peer: KAddress =>
-                    val header = new BasicHeader[KAddress](self, peer, Transport.UDP)
-                    val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)
-                    trigger(msg -> network)
-                }
+//                samples.foreach { peer: KAddress =>
+//                    val header = new BasicHeader[KAddress](self, peer, Transport.UDP)
+//                    val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)
+//                    trigger(msg -> network)
+//                }
             } else {
                 logger.debug("Empty croupier sample")
             }
         }
     }
 
-    network uponEvent {
-        // TODO Figure out how to 'extract' payload types without type erasure
-        case msg: BasicContentMsg[_, _, _] => handle {
-            val content = msg.getContent
-            content match {
-                case _: Ping =>
-                    logger.info(s"A ping! $msg")
-                    trigger(msg.answer(new Pong) -> network)
-                case _: Pong =>
-                    logger.info(s"A pong! $msg")
-                case _ => // Ignore
-            }
-        }
-    }
+//    network uponEvent {
+//        // TODO Figure out how to 'extract' payload types without type erasure
+//        case msg: BasicContentMsg[_, _, _] => handle {
+//            val content = msg.getContent
+//            content match {
+//                case _: Ping =>
+//                    logger.info(s"A ping! $msg")
+//                    trigger(msg.answer(new Pong) -> network)
+//                case _: Pong =>
+//                    logger.info(s"A pong! $msg")
+//                case _ => // Ignore
+//            }
+//        }
+//    }
 
     override def tearDown(): Unit = {
         timerId match {

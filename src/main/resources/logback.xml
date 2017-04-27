@@ -9,14 +9,14 @@
     </appender>
 
 
-    <logger name="se.sics.kompics.timer.java.JavaTimer" level="INFO"/>
-    <logger name="se.sics.ktoolbox.util.network.ports.One2NChannel" level="WARN"/>
+    <!--<logger name="se.sics.kompics.timer.java.JavaTimer" level="INFO"/>-->
+    <!--<logger name="se.sics.ktoolbox.util.network.ports.One2NChannel" level="WARN"/>-->
     <!--<logger name="se.sics" level="TRACE"/>-->
 
-    <logger name="dresden" level="DEBUG"/>
-    <logger name="template" level="DEBUG"/>
+    <!--<logger name="dresden" level="DEBUG"/>-->
+    <!--<logger name="template" level="DEBUG"/>-->
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="CONSOLE"/>
     </root>
 

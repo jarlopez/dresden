@@ -118,10 +118,10 @@ public class ScenarioGen {
     };
 
     public static SimulationScenario simpleBoot() {
-        return simpleBoot(false);
+        return simpleBoot(3,false);
     }
 
-    public static SimulationScenario simpleBoot(boolean useScala) {
+    public static SimulationScenario simpleBoot(int numNodes, boolean useScala) {
         SimulationScenario scen = new SimulationScenario() {
             {
                 StochasticProcess systemSetup = new StochasticProcess() {
@@ -139,15 +139,15 @@ public class ScenarioGen {
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
                         eventInterArrivalTime(uniform(1000, 1100));
-                        if (useScala) raise(3, startScalaNodes, new BasicIntSequentialDistribution(1));
-                        else raise(3, startJavaNodes, new BasicIntSequentialDistribution(1));
+                        if (useScala) raise(numNodes, startScalaNodes, new BasicIntSequentialDistribution(1));
+                        else raise(numNodes, startJavaNodes, new BasicIntSequentialDistribution(1));
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(1000 * 5, startPeers);
+                terminateAfterTerminationOf(10000, startPeers);
             }
         };
 
