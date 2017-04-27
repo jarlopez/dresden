@@ -23,7 +23,6 @@ import se.sics.kompics.*;
 import se.sics.kompics.network.Network;
 import se.sics.kompics.timer.Timer;
 import se.sics.ktoolbox.croupier.CroupierPort;
-import se.sics.ktoolbox.omngr.bootstrap.BootstrapClientComp;
 import se.sics.ktoolbox.overlaymngr.OverlayMngrPort;
 import se.sics.ktoolbox.overlaymngr.events.OMngrCroupier;
 import se.sics.ktoolbox.util.identifiable.overlay.OverlayId;
@@ -38,7 +37,7 @@ import template.kth.croupier.util.NoView;
  */
 public class AppMngrComp extends ComponentDefinition {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BootstrapClientComp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AppMngrComp.class);
     //*****************************CONNECTIONS**********************************
     Positive<OverlayMngrPort> omngrPort = requires(OverlayMngrPort.class);
     private String logPrefix = "";
@@ -52,8 +51,6 @@ public class AppMngrComp extends ComponentDefinition {
         @Override
         public void handle(OMngrCroupier.ConnectResponse event) {
             LOG.info("{}overlays connected", logPrefix);
-            connectAppComp();
-            trigger(Start.event, appComp.control());
             trigger(new OverlayViewUpdate.Indication<>(croupierId, false, new NoView()), extPorts.viewUpdatePort);
         }
     };
@@ -77,6 +74,8 @@ public class AppMngrComp extends ComponentDefinition {
 
         extPorts = init.extPorts;
         croupierId = init.croupierOId;
+
+        connectAppComp();
 
         subscribe(handleStart, control);
         subscribe(handleCroupierConnected, omngrPort);

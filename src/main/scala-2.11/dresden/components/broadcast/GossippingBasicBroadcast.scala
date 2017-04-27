@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports._
 import dresden.components.links.PP2PPayload
 import dresden.sim.GossipPayload
-import se.sics.kompics.KompicsEvent
+import se.sics.kompics.{KompicsEvent, Start}
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
@@ -29,10 +29,16 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 //    private var past = Set.empty[ProcMsgPair]
     private var past = Set.empty[Any]
 
+    ctrl uponEvent {
+        case _: Start => handle {
+            logger.info("Starting!")
+        }
+    }
+
     gbeb uponEvent {
         case x: GBEB_Broadcast => handle {
 //            past += ProcMsgPair(self, x.payload)
-            past += ((self.toString, x.payload))
+            past += ((self, x.payload))
         }
     }
 
@@ -56,23 +62,11 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
         case PL_Deliver(_, HistoryResponse(history)) => handle {
             logger.debug(s"$self Received HistoryResponse")
 
-            // FIXME This doesn't subtract correctly due to the GossipPayload instances differing
-
-            // TODO Avoid this O(nm) crap!
-            def existsInPast(it: Any) = it match {
-                case (addr: KAddress, payload: KompicsEvent) =>
-                    past.exists {
-                        case (addr2: KAddress, payload2: KompicsEvent) =>
-                            addr.sameHostAs(addr2) && payload.equals(payload2)
-                        case _ => false
-                    }
-                case _ => false
-            }
-
             val unseen: Set[Any] = history.diff(past)
 
             logger.debug(s"Unseen: ${unseen} vs past: ${past.size}")
-            for ( (pp: KAddress, m: GossipPayload) <- unseen) {
+            for ( (pp: KAddress, m: KompicsEvent) <- unseen) {
+                logger.info(s"Sending $m")
                 trigger(GBEB_Deliver(pp, m) -> gbeb)
             }
             past = past union unseen

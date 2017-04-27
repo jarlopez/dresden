@@ -15,7 +15,7 @@ import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
 
-class GossippingSimParent(init: Init[GossippingSimParent]) extends ComponentDefinition with StrictLogging {
+class GossipSimHost(init: Init[GossipSimHost]) extends ComponentDefinition with StrictLogging {
 
     val timer = requires[Timer]
     val network = requires[Network]
@@ -29,7 +29,7 @@ class GossippingSimParent(init: Init[GossippingSimParent]) extends ComponentDefi
     var dresden = None: Option[Component]
 
     def this(init: GossipSimInit) {
-        this(new Init[GossippingSimParent](init.selfAdr, init.bootstrapServer, init.croupierId))
+        this(new Init[GossipSimHost](init.selfAdr, init.bootstrapServer, init.croupierId))
     }
 
     ctrl uponEvent {
@@ -49,7 +49,8 @@ class GossippingSimParent(init: Init[GossippingSimParent]) extends ComponentDefi
 
     def createOverlayManager(): Unit = {
         bootstrapClient match {
-            case None => // Shhh
+            case None =>
+                logger.warn("No bootstrap client")
             case Some(bsClient) =>
                 val extPorts = new OverlayMngrComp.ExtPort(
                     timer,
@@ -62,13 +63,13 @@ class GossippingSimParent(init: Init[GossippingSimParent]) extends ComponentDefi
     }
 
     def createApp(): Unit = {
-        val extPorts = GossippingSim.ExtPort(
+        val extPorts = GossipSimWrapper.ExtPort(
             timer,
             network,
             overlayManager.get.getPositive(classOf[CroupierPort]),
             overlayManager.get.getNegative(classOf[OverlayViewUpdatePort])
         )
-        dresden = Some(create(classOf[GossippingSim], new Init[GossippingSim](croupierId, self, extPorts)))
+        dresden = Some(create(classOf[GossipSimWrapper], new Init[GossipSimWrapper](croupierId, self, extPorts)))
         connect(dresden.get.getNegative(classOf[OverlayMngrPort]), overlayManager.get.getPositive(classOf[OverlayMngrPort]), Channel.TWO_WAY)
     }
 

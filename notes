@@ -1,0 +1,3 @@
+Scala:
+    - Enters ScalaComponent.doCreate (line 119 or so)
+    - Hypothesis: this doCreate differs from Java version, sothe Start event gets dispatched automatically

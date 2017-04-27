@@ -60,13 +60,13 @@ class SimHost(init: Init[SimHost]) extends ComponentDefinition with StrictLoggin
     }
 
     def createApp(): Unit = {
-        val extPorts = GossippingSim.ExtPort(
+        val extPorts = GossipSimWrapper.ExtPort(
             timer,
             network,
             overlayManager.get.getPositive(classOf[CroupierPort]),
             overlayManager.get.getNegative(classOf[OverlayViewUpdatePort])
         )
-        dresden = Some(create(classOf[GossippingSim], new Init[GossippingSim](croupierId, self, extPorts)))
+        dresden = Some(create(classOf[GossipSimWrapper], new Init[GossipSimWrapper](croupierId, self, extPorts)))
         connect(dresden.get.getNegative(classOf[OverlayMngrPort]), overlayManager.get.getPositive(classOf[OverlayMngrPort]), Channel.TWO_WAY)
     }
 

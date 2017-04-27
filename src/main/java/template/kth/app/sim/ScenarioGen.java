@@ -1,7 +1,5 @@
 package template.kth.app.sim;
 
-import dresden.sim.GossippingSimParent;
-import dresden.sim.GossipSimInit;
 import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
@@ -12,6 +10,7 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
+import template.HostManager;
 import template.kth.sim.compatibility.SimNodeIdExtractor;
 import template.kth.system.HostMngrComp;
 
@@ -51,7 +50,7 @@ public class ScenarioGen {
         }
     };
 
-    static Operation1<StartNodeEvent, Integer> startNodeOp = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
+    static Operation1<StartNodeEvent, Integer> startJavaNodes = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
         KAddress selfAdr;
 
         {
@@ -85,12 +84,11 @@ public class ScenarioGen {
     };
 
 
-    static Operation1<StartNodeEvent, Integer> startGossipNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
+    static Operation1<StartNodeEvent, Integer> startScalaNodes = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
         KAddress selfAdr;
 
         {
-            // 193.0.0.1 is restricted to bootstrap node
-            String nodeIp = "194.0.0." + nodeId;
+            String nodeIp = "193.0.0." + nodeId;
             selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
         }
 
@@ -101,12 +99,12 @@ public class ScenarioGen {
 
         @Override
         public Class getComponentDefinition() {
-            return GossippingSimParent.class;
+            return HostManager.class;
         }
 
         @Override
-        public GossipSimInit getComponentInit() {
-            return new GossipSimInit(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
+        public HostManager.Init getComponentInit() {
+            return new HostManager.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
         }
 
         @Override
@@ -140,16 +138,16 @@ public class ScenarioGen {
                 };
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
-//                        eventInterArrivalTime(uniform(1000, 1100));
-                        eventInterArrivalTime(constant(1000));
-                        raise(3, startGossipNode, new BasicIntSequentialDistribution(1));
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        if (useScala) raise(3, startScalaNodes, new BasicIntSequentialDistribution(1));
+                        else raise(3, startJavaNodes, new BasicIntSequentialDistribution(1));
                     }
                 };
 
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(1000 * 1000 * 3, startPeers);
+                terminateAfterTerminationOf(1000 * 5, startPeers);
             }
         };
 
