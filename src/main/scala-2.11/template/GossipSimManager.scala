@@ -2,10 +2,13 @@ package template
 
 
 import com.typesafe.scalalogging.StrictLogging
+import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.broadcast.GossippingBasicBroadcast
+import dresden.components.links.PerfectP2PLink
+import se.sics.kompics.{Channel, Negative, Positive, Start}
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
-import se.sics.kompics.{ComponentDefinition => _, Handler => _, _}
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.overlaymngr.OverlayMngrPort
 import se.sics.ktoolbox.overlaymngr.events.OMngrCroupier
@@ -20,18 +23,36 @@ object GossipSimManager {
 
     case class Init(extPorts: GossipSimManager.ExtPort, selfAdr: KAddress, croupierOId: OverlayId) extends se.sics.kompics.Init[GossipSimManager]
 
-    case class ExtPort(timerPort: Positive[Timer], networkPort: Positive[Network], croupierPort: Positive[CroupierPort], viewUpdatePort: Negative[OverlayViewUpdatePort])
+    case class ExtPort(timerPort: Positive[Timer],
+                       networkPort: Positive[Network],
+                       croupierPort: Positive[CroupierPort],
+                       viewUpdatePort: Negative[OverlayViewUpdatePort]
+                      )
 
 }
 
 class GossipSimManager(val init: GossipSimManager.Init) extends ComponentDefinition with StrictLogging {
     val omngrPort = requires[OverlayMngrPort]
 
-    val (extPorts, selfAdr, croupierId) = init match {
+    val (extPorts, self, croupierId) = init match {
         case GossipSimManager.Init(e: ExtPort, s: KAddress, c: OverlayId) => (e, s, c)
     }
 
-    val appComp: Component = create(classOf[GossipSimApp], GossipSimApp.Init(selfAdr, croupierId))
+    val appComp = create(classOf[GossipSimApp], GossipSimApp.Init(self, croupierId))
+    val pp2pl = create(classOf[PerfectP2PLink], new Init[PerfectP2PLink](self))
+    val gossip = create(classOf[GossippingBasicBroadcast], new Init[GossippingBasicBroadcast](self))
+
+
+    // Perfect links
+    connect(pp2pl.getNegative(classOf[Network]), extPorts.networkPort, Channel.TWO_WAY)
+
+
+    // Gossipping broadcast
+    connect[PerfectLink](pp2pl -> gossip)
+    connect(gossip.getNegative(classOf[CroupierPort]), extPorts.croupierPort, Channel.TWO_WAY)
+
+    // Application
+    connect[GossippingBestEffortBroadcast](gossip -> appComp)
     connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
     connect(appComp.getNegative(classOf[Network]), extPorts.networkPort, Channel.TWO_WAY)
     connect(appComp.getNegative(classOf[CroupierPort]), extPorts.croupierPort, Channel.TWO_WAY)

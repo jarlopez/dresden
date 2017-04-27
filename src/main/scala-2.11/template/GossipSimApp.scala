@@ -1,18 +1,18 @@
 package template
 
+import java.util.UUID
+
 import com.typesafe.scalalogging.StrictLogging
+import dresden.components.Ports.{GBEB_Broadcast, GBEB_Deliver, GossippingBestEffortBroadcast}
 import dresden.networking.{PingMessage, PongMessage}
-import se.sics.kompics.network.{Network, Transport}
+import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
-import se.sics.kompics.timer.Timer
+import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timeout, Timer}
 import se.sics.kompics.{KompicsEvent, Start}
 import se.sics.ktoolbox.croupier.CroupierPort
-import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.identifiable.Identifier
-import se.sics.ktoolbox.util.network.{KAddress, KContentMsg, KHeader}
-import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
-
-import scala.reflect.ClassTag
+import se.sics.ktoolbox.util.network.KAddress
+import template.kth.app.sim.SimulationResultSingleton
 
 
 object GossipSimApp {
@@ -26,47 +26,86 @@ object GossipSimApp {
 }
 
 class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with StrictLogging {
-    import GossipSimApp.{Ping, Pong}
 
-    val selfAdr = init match {
+    val self = init match {
         case GossipSimApp.Init(self, gradientOid) => self
     }
 
-    val timerPort = requires[Timer]
-    val networkPort = requires[Network]
-    val croupierPort = requires[CroupierPort]
+    val timer = requires[Timer]
+    val network = requires[Network]
+    val croupier = requires[CroupierPort]
+    val gossip = requires[GossippingBestEffortBroadcast]
+
+    private var sent = Set.empty[String]
+    private var received = Set.empty[String]
+
+    private var timerId: Option[UUID] = None
+    private val period: Long = 2000 // TODO
+
+    private def sendGossip() = {
+        val id: String = UUID.randomUUID().toString
+        logger.info(s"$self triggering gossip $id")
+        val payload = GossipPayload(self, id)
+        trigger(GBEB_Broadcast(payload) -> gossip)
+        sent += id
+
+        import scala.collection.JavaConverters._
+        SimulationResultSingleton.getInstance().put(self.toString + "-sent", sent.asJava)
+    }
 
     ctrl uponEvent {
         case _: Start => handle {
-            logger.info(s"$selfAdr starting...")
+            logger.info(s"$self starting...")
+            val spt = new SchedulePeriodicTimeout(0, period)
+            val timeout = DresdenTimeout(spt)
+            spt.setTimeoutEvent(timeout)
+            trigger(spt -> timer)
+            timerId = Some(timeout.getTimeoutId)
         }
     }
 
-    croupierPort uponEvent {
-        case sample: CroupierSample[_] => handle {
-            if (!sample.publicSample.isEmpty) {
-                logger.info("Handling croupier sample")
-                import scala.collection.JavaConversions._
-                val samples = sample.publicSample.values().map { it => it.getSource }
-                samples.foreach { peer: KAddress =>
-                    val header = new BasicHeader[KAddress](selfAdr, peer, Transport.UDP)
-                    val msg = new BasicContentMsg[KAddress, KHeader[KAddress], Ping](header, new Ping)
-                    trigger(msg -> networkPort)
-                }
+    timer uponEvent {
+        case DresdenTimeout(_) => handle {
+            sendGossip()
+            killTimer()
+        }
+    }
+
+    gossip uponEvent {
+        case GBEB_Deliver(_, payload@GossipPayload(from, id)) => handle {
+            if (received.contains(id)) {
+                logger.warn(s"Duplicated GBEB Deliver message $payload")
             } else {
-                logger.debug("Empty croupier sample")
+                received += id
+                logger.info(s"$self received gossip $id")
+
+                import scala.collection.JavaConverters._
+                SimulationResultSingleton.getInstance().put(self.toString + "-recvd", received.asJava)
             }
         }
+        case anything => handle {
+            logger.warn(s"$self unexpected gossip event: $anything")
+        }
     }
 
-    networkPort uponEvent {
-        case msg@PingMessage() => handle {
-            logger.info(s"$selfAdr received special ping ${msg.getContent} from ${msg.getHeader.getSource}")
-            trigger(msg.answer(new Pong), networkPort)
+    private def killTimer() = {
+        timerId match {
+            case Some(id) =>
+                trigger(new CancelPeriodicTimeout(id) -> timer)
+            case None => // Nothing to do
         }
-        case msg@PongMessage() => handle {
-            logger.info(s"$selfAdr received special pong from from ${msg.getHeader.getSource}")
-        }
-
     }
+
+    override def tearDown(): Unit = {
+        killTimer()
+    }
+}
+
+case class DresdenTimeout(spt: SchedulePeriodicTimeout) extends Timeout(spt)
+case class GossipPayload(from: KAddress, id: String) extends KompicsEvent {
+    override def equals(o: Any) = o match {
+        case that: GossipPayload => that.id.equals(this.id)
+        case _ => false
+    }
+    override def hashCode = id.hashCode
 }

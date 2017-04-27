@@ -26,7 +26,6 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
         case Init(s: KAddress) => s
     }
 
-//    private var past = Set.empty[ProcMsgPair]
     private var past = Set.empty[Any]
 
     ctrl uponEvent {
@@ -37,7 +36,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 
     gbeb uponEvent {
         case x: GBEB_Broadcast => handle {
-//            past += ProcMsgPair(self, x.payload)
+            logger.debug(s"$self Broadcasting $x")
             past += ((self, x.payload))
         }
     }
@@ -80,6 +79,5 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 case class ProcMsgPair(src: KAddress, payload: KompicsEvent)
 
 case object HistoryRequest extends KompicsEvent
-//case class HistoryResponse(past: Set[ProcMsgPair]) extends KompicsEvent
 case class HistoryResponse(past: Set[Any]) extends KompicsEvent
 

@@ -1,7 +1,9 @@
 package template
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.GossippingBestEffortBroadcast
+import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.broadcast.GossippingBasicBroadcast
+import dresden.components.links.PerfectP2PLink
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import se.sics.kompics.{Channel, Component, Start}
@@ -38,11 +40,24 @@ class HostManager(val init: HostManager.Init) extends ComponentDefinition with S
     val timerPort = requires[Timer]
     val networkPort = requires[Network]
 
+
     val bootstrapClientComp = create(classOf[BootstrapClientComp], new BootstrapClientComp.Init(selfAdr, bootstrapServer))
     val overlayMngrComp = create(classOf[OverlayMngrComp], new OverlayMngrComp.Init(selfAdr.asInstanceOf[NatAwareAddress], new OverlayMngrComp.ExtPort(timerPort, networkPort, bootstrapClientComp.getPositive(classOf[CCHeartbeatPort]))))
-    val appMngrComp = create(classOf[GossipSimManager], new GossipSimManager.Init(new GossipSimManager.ExtPort(timerPort, networkPort, overlayMngrComp.getPositive(classOf[CroupierPort]), overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])), selfAdr, croupierId))
+    val appMngrComp = create(classOf[GossipSimManager],
+                                GossipSimManager.Init(
+                                    GossipSimManager.ExtPort(
+                                        timerPort,
+                                        networkPort,
+                                        overlayMngrComp.getPositive(classOf[CroupierPort]),
+                                        overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
+                                    ),
+                                    selfAdr, croupierId))
 
+
+    // Bootstrap client
     connect[Timer](timerPort -> bootstrapClientComp)
     connect[Network](networkPort -> bootstrapClientComp)
+
+    // Application manager
     connect[OverlayMngrPort](overlayMngrComp -> appMngrComp)
 }
