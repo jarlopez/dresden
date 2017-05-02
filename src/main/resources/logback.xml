@@ -15,6 +15,7 @@
 
     <!--<logger name="dresden" level="DEBUG"/>-->
     <!--<logger name="template" level="DEBUG"/>-->
+    <logger name="se.sics.ktoolbox.croupier" level="ERROR"/>
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>

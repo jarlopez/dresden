@@ -4,7 +4,6 @@ package dresden.components.broadcast
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports._
 import dresden.components.links.PP2PPayload
-import dresden.sim.GossipPayload
 import se.sics.kompics.{KompicsEvent, Start}
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.croupier.CroupierPort

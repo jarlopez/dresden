@@ -46,7 +46,6 @@ class GossipSimManager(val init: GossipSimManager.Init) extends ComponentDefinit
     // Perfect links
     connect(pp2pl.getNegative(classOf[Network]), extPorts.networkPort, Channel.TWO_WAY)
 
-
     // Gossipping broadcast
     connect[PerfectLink](pp2pl -> gossip)
     connect(gossip.getNegative(classOf[CroupierPort]), extPorts.croupierPort, Channel.TWO_WAY)

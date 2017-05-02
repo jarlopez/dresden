@@ -12,13 +12,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class GossipTests {
+    // TODO Keep track of which nodes are correct in churny tests
 
     private final SimulationResultMap res = SimulationResultSingleton.getInstance();
     @Test
     public void noChurn() {
         int numNodes = 100;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.simpleBoot(numNodes, true);
+        SimulationScenario simpleBootScenario = ScenarioGen.gossipNoChurn(numNodes, true);
         simpleBootScenario.simulate(LauncherComp.class);
 
         for (int i = 1; i <= numNodes; i++) {

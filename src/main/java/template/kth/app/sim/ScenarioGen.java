@@ -118,10 +118,10 @@ public class ScenarioGen {
     };
 
     public static SimulationScenario simpleBoot() {
-        return simpleBoot(3,false);
+        return gossipNoChurn(3,false);
     }
 
-    public static SimulationScenario simpleBoot(int numNodes, boolean useScala) {
+    public static SimulationScenario gossipNoChurn(int numNodes, boolean useScala) {
         SimulationScenario scen = new SimulationScenario() {
             {
                 StochasticProcess systemSetup = new StochasticProcess() {
