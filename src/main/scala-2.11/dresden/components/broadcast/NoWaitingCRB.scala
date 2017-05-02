@@ -25,11 +25,11 @@ class NoWaitingCRB(init: Init[NoWaitingCRB]) extends ComponentDefinition with St
     }
 
     private var delivered = Set.empty[KompicsEvent]
-    // TODO Data type?
     private var past = ListBuffer.empty[Any] // TODO Data type?
 
     crb uponEvent {
         case CRB_Broadcast(payload) => handle {
+            logger.debug(s"$self broadcasting $payload")
             trigger(RB_Broadcast(NoWaitingCRB.DataMessage(past.toList, payload)) -> rb)
             past += (self, payload)
         }
@@ -40,6 +40,8 @@ class NoWaitingCRB(init: Init[NoWaitingCRB]) extends ComponentDefinition with St
             if (!delivered.contains(payload)) {
                 for ((s: KAddress, n: KompicsEvent) <- mpast) {
                     if (!delivered.contains(n)) {
+                        logger.debug(s"$self delivering $payload")
+
                         trigger(CRB_Deliver(s, n) -> crb)
                         delivered += n
                         if (!past.contains((s, n))) {
