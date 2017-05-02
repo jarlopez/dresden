@@ -1,23 +1,25 @@
-package template
-
+package dresden.sim.broadcast
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BestEffortBroadcast, PerfectLink}
 import dresden.components.broadcast.GossippingBasicBroadcast
 import dresden.components.links.PerfectP2PLink
-import se.sics.kompics.{Channel, Negative, Positive, Start}
+import dresden.sim.broadcast.GossipSimManager.ExtPort
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
+import se.sics.kompics.{Channel, Negative, Positive, Start}
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.overlaymngr.OverlayMngrPort
 import se.sics.ktoolbox.overlaymngr.events.OMngrCroupier
 import se.sics.ktoolbox.util.identifiable.overlay.OverlayId
 import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.overlays.view.{OverlayViewUpdate, OverlayViewUpdatePort}
-import template.GossipSimManager.ExtPort
 import template.kth.croupier.util.NoView
 
+
+case object GossipSim
+case object RBSim
 
 object GossipSimManager {
 

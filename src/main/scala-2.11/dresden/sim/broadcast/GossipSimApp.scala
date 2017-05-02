@@ -1,10 +1,9 @@
-package template
+package dresden.sim.broadcast
 
 import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BEB_Broadcast, BEB_Deliver, BestEffortBroadcast}
-import dresden.networking.{PingMessage, PongMessage}
 import dresden.sim.SimUtil
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._

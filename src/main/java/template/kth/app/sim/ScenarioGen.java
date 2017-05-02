@@ -10,7 +10,7 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
-import template.HostManager;
+import dresden.sim.HostManager;
 import template.kth.sim.compatibility.SimNodeIdExtractor;
 import template.kth.system.HostMngrComp;
 

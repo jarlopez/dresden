@@ -2,7 +2,7 @@ package dresden.networking
 
 
 import se.sics.ktoolbox.util.network.{KContentMsg, KHeader}
-import template.GossipSimApp.{Ping, Pong}
+import dresden.sim.broadcast.GossipSimApp.{Ping, Pong}
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._

@@ -1,32 +1,25 @@
-package template
+package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{BestEffortBroadcast, PerfectLink}
-import dresden.components.broadcast.GossippingBasicBroadcast
-import dresden.components.links.PerfectP2PLink
-import org.slf4j.Logger
+import dresden.sim.broadcast.GossipSimManager
 import org.slf4j.LoggerFactory
-import se.sics.kompics.{Channel, Component, Start}
-import se.sics.kompics.sl._
 import se.sics.kompics.network.Network
+import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
 import se.sics.ktoolbox.cc.heartbeat.CCHeartbeatPort
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapClientComp
-import se.sics.ktoolbox.overlaymngr.OverlayMngrComp
-import se.sics.ktoolbox.overlaymngr.OverlayMngrPort
+import se.sics.ktoolbox.overlaymngr.{OverlayMngrComp, OverlayMngrPort}
 import se.sics.ktoolbox.util.identifiable.overlay.OverlayId
 import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
-import template.kth.app.mngr.AppMngrComp
+
 
 
 object HostManager {
-    private val LOG = LoggerFactory.getLogger(classOf[HostManager])
 
-    case class Init(selfAdr: KAddress, bootstrapServer: KAddress, croupierId: OverlayId) extends se.sics.kompics.Init[HostManager] {
-    }
+    case class Init(selfAdr: KAddress, bootstrapServer: KAddress, croupierId: OverlayId) extends se.sics.kompics.Init[HostManager]
 
 }
 
