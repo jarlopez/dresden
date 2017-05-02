@@ -48,6 +48,8 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
                 for (p: KAddress <- peers) {
                     trigger(PL_Send(p, PP2PPayload(HistoryRequest)) -> pp2p)
                 }
+                // XXX Is this correct?
+                trigger(PL_Send(self, PP2PPayload(HistoryRequest)) -> pp2p)
             }
         }
     }

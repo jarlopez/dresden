@@ -111,7 +111,8 @@ public class ScenarioGen {
     };
 
     public static SimulationScenario gossipNoChurn(int numNodes) {
-        SimulationScenario scen = new SimulationScenario() {
+
+        return new SimulationScenario() {
             {
                 StochasticProcess systemSetup = new StochasticProcess() {
                     {
@@ -138,7 +139,36 @@ public class ScenarioGen {
                 terminateAfterTerminationOf(10000, startPeers);
             }
         };
-
-        return scen;
     }
+    public static SimulationScenario rbNoChurn(int numNodes) {
+
+        return new SimulationScenario() {
+            {
+                StochasticProcess systemSetup = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, systemSetupOp);
+                    }
+                };
+                StochasticProcess startBootstrapServer = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, startBootstrapServerOp);
+                    }
+                };
+                StochasticProcess startPeers = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        raise(numNodes, startRBNode, new BasicIntSequentialDistribution(1));
+                    }
+                };
+
+                systemSetup.start();
+                startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
+                startPeers.startAfterTerminationOf(1000, startBootstrapServer);
+                terminateAfterTerminationOf(10000, startPeers);
+            }
+        };
+    }
+
 }

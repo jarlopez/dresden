@@ -30,16 +30,16 @@ class EagerReliableBroadcast(init: Init[EagerReliableBroadcast]) extends Compone
     beb uponEvent {
         // BEB_Deliver.src should match origin
         case msg@BEB_Deliver(_, data@OriginatedData(origin, payload)) => handle {
-            if (msg.src != origin) {
-                logger.warn(s"Source ($msg.src) and origin($origin) do not match on $msg")
-            } else {
+//            if (msg.src != origin) {
+//                logger.warn(s"$self Source ($msg.src) and origin($origin) do not match on $msg")
+//            } else {
                 if (!delivered.contains(payload)) {
                     delivered = delivered + payload
                     logger.debug(s"$self RB_Delivering $payload")
                     trigger(RB_Deliver(origin, payload) -> rb)
                     trigger(BEB_Broadcast(data) -> beb)
                 }
-            }
+//            }
         }
     }
 }

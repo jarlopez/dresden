@@ -62,8 +62,12 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
     }
 
     rb uponEvent {
-        case RB_Deliver(src, payload) => handle {
+        case RB_Deliver(_, payload@BroadcastPayload(src, id)) => handle {
             logger.info(s"$self RB_Delivering $payload from $src")
+            received += id
+
+            import scala.collection.JavaConverters._
+            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
         }
     }
 
