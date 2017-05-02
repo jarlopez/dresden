@@ -15,6 +15,8 @@ object SimUtil {
             case that: BroadcastPayload => that.id.equals(this.id)
             case _ => false
         }
+
         override def hashCode = id.hashCode
     }
+
 }

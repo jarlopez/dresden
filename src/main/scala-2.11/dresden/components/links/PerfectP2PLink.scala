@@ -6,7 +6,7 @@ import se.sics.kompics.KompicsEvent
 import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.util.network.basic.{BasicContentMsg, BasicHeader}
-import se.sics.ktoolbox.util.network.{KAddress, KContentMsg, KHeader}
+import se.sics.ktoolbox.util.network.{KAddress, KHeader}
 
 case class PP2PPayload(data: KompicsEvent) extends KompicsEvent
 

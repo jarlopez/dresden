@@ -1,8 +1,8 @@
 package dresden.networking
 
 
-import se.sics.ktoolbox.util.network.{KContentMsg, KHeader}
 import dresden.sim.broadcast.GossipSimApp.{Ping, Pong}
+import se.sics.ktoolbox.util.network.{KContentMsg, KHeader}
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
@@ -20,4 +20,5 @@ abstract class MessageCheck[T: TypeTag] {
 }
 
 object PingMessage extends MessageCheck[Ping]
+
 object PongMessage extends MessageCheck[Pong]

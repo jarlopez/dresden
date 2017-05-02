@@ -2,7 +2,6 @@ package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.sim.broadcast.GossipSimManager
-import org.slf4j.LoggerFactory
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
@@ -14,7 +13,6 @@ import se.sics.ktoolbox.util.identifiable.overlay.OverlayId
 import se.sics.ktoolbox.util.network.KAddress
 import se.sics.ktoolbox.util.network.nat.NatAwareAddress
 import se.sics.ktoolbox.util.overlays.view.OverlayViewUpdatePort
-
 
 
 object HostManager {
@@ -32,19 +30,17 @@ class HostManager(val init: HostManager.Init) extends ComponentDefinition with S
 
     val timerPort = requires[Timer]
     val networkPort = requires[Network]
-
-
     val bootstrapClientComp = create(classOf[BootstrapClientComp], new BootstrapClientComp.Init(selfAdr, bootstrapServer))
     val overlayMngrComp = create(classOf[OverlayMngrComp], new OverlayMngrComp.Init(selfAdr.asInstanceOf[NatAwareAddress], new OverlayMngrComp.ExtPort(timerPort, networkPort, bootstrapClientComp.getPositive(classOf[CCHeartbeatPort]))))
     val appMngrComp = create(classOf[GossipSimManager],
-                                GossipSimManager.Init(
-                                    GossipSimManager.ExtPort(
-                                        timerPort,
-                                        networkPort,
-                                        overlayMngrComp.getPositive(classOf[CroupierPort]),
-                                        overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
-                                    ),
-                                    selfAdr, croupierId))
+        GossipSimManager.Init(
+            GossipSimManager.ExtPort(
+                timerPort,
+                networkPort,
+                overlayMngrComp.getPositive(classOf[CroupierPort]),
+                overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
+            ),
+            selfAdr, croupierId))
 
 
     // Bootstrap client

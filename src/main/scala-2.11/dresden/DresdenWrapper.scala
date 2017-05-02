@@ -20,13 +20,12 @@ import template.kth.croupier.util.NoView
 
 class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition with StrictLogging {
 
-    val overlayManager: PositivePort[OverlayMngrPort] = requires[OverlayMngrPort]
-
     private val (croupierId, self, ext) = init match {
         case Init(crId: OverlayId, s: KAddress, e: ExtPort) =>
             (crId, s, e)
     }
-
+    
+    val overlayManager: PositivePort[OverlayMngrPort] = requires[OverlayMngrPort]
     val gossip = create(classOf[GossippingBasicBroadcast], new Init[GossippingBasicBroadcast](self))
     val pp2p = create(classOf[PerfectP2PLink], new Init[PerfectP2PLink](self))
 

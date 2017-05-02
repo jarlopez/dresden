@@ -4,8 +4,8 @@ package dresden.components.broadcast
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports._
 import dresden.components.links.PP2PPayload
-import se.sics.kompics.{KompicsEvent, Start}
 import se.sics.kompics.sl._
+import se.sics.kompics.{KompicsEvent, Start}
 import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.croupier.event.CroupierSample
 import se.sics.ktoolbox.util.network.KAddress
@@ -63,7 +63,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
             val unseen: Set[Any] = history.diff(past)
 
             logger.debug(s"Unseen: ${unseen} vs past: ${past.size}")
-            for ( (pp: KAddress, m: KompicsEvent) <- unseen) {
+            for ((pp: KAddress, m: KompicsEvent) <- unseen) {
                 logger.info(s"Sending $m")
                 trigger(BEB_Deliver(pp, m) -> gbeb)
             }
@@ -75,8 +75,10 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 
     }
 }
+
 case class ProcMsgPair(src: KAddress, payload: KompicsEvent)
 
 case object HistoryRequest extends KompicsEvent
+
 case class HistoryResponse(past: Set[Any]) extends KompicsEvent
 

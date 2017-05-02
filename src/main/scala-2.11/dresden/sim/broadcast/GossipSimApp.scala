@@ -4,8 +4,8 @@ import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BEB_Broadcast, BEB_Deliver, BestEffortBroadcast}
-import dresden.sim.SimUtil.{BroadcastPayload, DresdenTimeout}
 import dresden.sim.SimUtil
+import dresden.sim.SimUtil.{BroadcastPayload, DresdenTimeout}
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timer}
@@ -34,22 +34,13 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
     val timer = requires[Timer]
     val network = requires[Network]
     val gossip = requires[BestEffortBroadcast]
-
+    private val period: Long = 2000 // TODO
     private var sent = Set.empty[String]
     private var received = Set.empty[String]
-
     private var timerId: Option[UUID] = None
-    private val period: Long = 2000 // TODO
 
-    private def sendGossip() = {
-        val id: String = UUID.randomUUID().toString
-        logger.info(s"$self triggering gossip $id")
-        val payload = BroadcastPayload(self, id)
-        trigger(BEB_Broadcast(payload) -> gossip)
-        sent += id
-
-        import scala.collection.JavaConverters._
-        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
+    override def tearDown(): Unit = {
+        killTimer()
     }
 
     ctrl uponEvent {
@@ -79,7 +70,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
                 logger.info(s"$self received gossip $id")
 
                 import scala.collection.JavaConverters._
-                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR,  received.asJava)
+                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
             }
         }
         case anything => handle {
@@ -95,7 +86,14 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         }
     }
 
-    override def tearDown(): Unit = {
-        killTimer()
+    private def sendGossip() = {
+        val id: String = UUID.randomUUID().toString
+        logger.info(s"$self triggering gossip $id")
+        val payload = BroadcastPayload(self, id)
+        trigger(BEB_Broadcast(payload) -> gossip)
+        sent += id
+
+        import scala.collection.JavaConverters._
+        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
     }
 }

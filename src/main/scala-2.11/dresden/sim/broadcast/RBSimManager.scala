@@ -18,7 +18,6 @@ import se.sics.ktoolbox.util.overlays.view.{OverlayViewUpdate, OverlayViewUpdate
 import template.kth.croupier.util.NoView
 
 
-
 object RBSimManager {
 
     case class Init(extPorts: RBSimManager.ExtPort, selfAdr: KAddress, croupierOId: OverlayId) extends se.sics.kompics.Init[RBSimManager]

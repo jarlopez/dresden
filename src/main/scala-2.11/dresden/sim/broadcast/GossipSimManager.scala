@@ -19,6 +19,7 @@ import template.kth.croupier.util.NoView
 
 
 case object GossipSim
+
 case object RBSim
 
 object GossipSimManager {

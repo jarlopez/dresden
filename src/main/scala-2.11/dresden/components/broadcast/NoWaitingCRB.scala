@@ -2,7 +2,6 @@ package dresden.components.broadcast
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports._
-import dresden.components.broadcast.NoWaitingCRB.DataMessage
 import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.util.network.KAddress

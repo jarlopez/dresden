@@ -4,13 +4,12 @@ import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports._
-import dresden.sim.SimUtil.{BroadcastPayload, DresdenTimeout}
 import dresden.sim.SimUtil
+import dresden.sim.SimUtil.{BroadcastPayload, DresdenTimeout}
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
-import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timeout, Timer}
+import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timer}
 import se.sics.kompics.{KompicsEvent, Start}
-import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.util.identifiable.Identifier
 import se.sics.ktoolbox.util.network.KAddress
 import template.kth.app.sim.SimulationResultSingleton
@@ -35,22 +34,13 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
     val timer = requires[Timer]
     val network = requires[Network]
     val rb = requires[ReliableBroadcast]
-
+    private val period: Long = 2000 // TODO
     private var sent = Set.empty[String]
     private var received = Set.empty[String]
-
     private var timerId: Option[UUID] = None
-    private val period: Long = 2000 // TODO
 
-    private def sendGossip() = {
-        val id: String = UUID.randomUUID().toString
-        logger.info(s"$self triggering rb $id")
-        val payload = BroadcastPayload(self, id)
-        trigger(BEB_Broadcast(payload) -> rb)
-        sent += id
-
-        import scala.collection.JavaConverters._
-        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
+    override def tearDown(): Unit = {
+        killTimer()
     }
 
     ctrl uponEvent {
@@ -85,7 +75,14 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
         }
     }
 
-    override def tearDown(): Unit = {
-        killTimer()
+    private def sendGossip() = {
+        val id: String = UUID.randomUUID().toString
+        logger.info(s"$self triggering rb $id")
+        val payload = BroadcastPayload(self, id)
+        trigger(BEB_Broadcast(payload) -> rb)
+        sent += id
+
+        import scala.collection.JavaConverters._
+        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
     }
 }
