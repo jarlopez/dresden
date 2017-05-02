@@ -1,7 +1,7 @@
 package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.sim.broadcast.GossipSimManager
+import dresden.sim.broadcast.{GossipSimManager, RBSimManager}
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
@@ -32,16 +32,29 @@ class HostManager(val init: HostManager.Init) extends ComponentDefinition with S
     val networkPort = requires[Network]
     val bootstrapClientComp = create(classOf[BootstrapClientComp], new BootstrapClientComp.Init(selfAdr, bootstrapServer))
     val overlayMngrComp = create(classOf[OverlayMngrComp], new OverlayMngrComp.Init(selfAdr.asInstanceOf[NatAwareAddress], new OverlayMngrComp.ExtPort(timerPort, networkPort, bootstrapClientComp.getPositive(classOf[CCHeartbeatPort]))))
-    val appMngrComp = create(classOf[GossipSimManager],
-        GossipSimManager.Init(
-            GossipSimManager.ExtPort(
-                timerPort,
-                networkPort,
-                overlayMngrComp.getPositive(classOf[CroupierPort]),
-                overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
-            ),
-            selfAdr, croupierId))
 
+    val appMngrComp = config.getValue("dresden.sim.type", classOf[String]) match {
+        case "rb" =>
+            create(classOf[RBSimManager],
+                RBSimManager.Init(
+                    RBSimManager.ExtPort(
+                        timerPort,
+                        networkPort,
+                        overlayMngrComp.getPositive(classOf[CroupierPort]),
+                        overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
+                    ),
+                    selfAdr, croupierId))
+        case "gossip" =>
+            create(classOf[GossipSimManager],
+                GossipSimManager.Init(
+                    GossipSimManager.ExtPort(
+                        timerPort,
+                        networkPort,
+                        overlayMngrComp.getPositive(classOf[CroupierPort]),
+                        overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
+                    ),
+                    selfAdr, croupierId))
+    }
 
     // Bootstrap client
     connect[Timer](timerPort -> bootstrapClientComp)

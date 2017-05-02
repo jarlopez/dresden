@@ -56,7 +56,7 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
 
     timer uponEvent {
         case DresdenTimeout(_) => handle {
-            sendGossip()
+            sendBroadcast()
             killTimer()
         }
     }
@@ -75,11 +75,11 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
         }
     }
 
-    private def sendGossip() = {
+    private def sendBroadcast() = {
         val id: String = UUID.randomUUID().toString
         logger.info(s"$self triggering rb $id")
         val payload = BroadcastPayload(self, id)
-        trigger(BEB_Broadcast(payload) -> rb)
+        trigger(RB_Broadcast(payload) -> rb)
         sent += id
 
         import scala.collection.JavaConverters._

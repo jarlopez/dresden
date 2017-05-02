@@ -10,7 +10,6 @@ import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
 import se.sics.ktoolbox.omngr.bootstrap.BootstrapServerComp;
 import se.sics.ktoolbox.util.network.KAddress;
-import dresden.sim.HostManager;
 import template.kth.sim.compatibility.SimNodeIdExtractor;
 import template.kth.system.HostMngrComp;
 
@@ -84,32 +83,12 @@ public class ScenarioGen {
     };
 
 
-    static Operation1<StartNodeEvent, Integer> startScalaNodes = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeEvent() {
-        KAddress selfAdr;
-
-        {
-            String nodeIp = "193.0.0." + nodeId;
-            selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
-        }
-
-        @Override
-        public Address getNodeAddress() {
-            return selfAdr;
-        }
-
-        @Override
-        public Class getComponentDefinition() {
-            return HostManager.class;
-        }
-
-        @Override
-        public HostManager.Init getComponentInit() {
-            return new HostManager.Init(selfAdr, ScenarioSetup.bootstrapServer, ScenarioSetup.croupierOId);
-        }
+    static Operation1<StartNodeEvent, Integer> startGossipNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeOp(nodeId) {
 
         @Override
         public Map<String, Object> initConfigUpdate() {
             Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("dresden.sim.type", "gossip");
             nodeConfig.put("system.id", nodeId);
             nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
             nodeConfig.put("system.port", ScenarioSetup.appPort);
@@ -117,11 +96,21 @@ public class ScenarioGen {
         }
     };
 
-    public static SimulationScenario simpleBoot() {
-        return gossipNoChurn(3,false);
-    }
 
-    public static SimulationScenario gossipNoChurn(int numNodes, boolean useScala) {
+    static Operation1<StartNodeEvent, Integer> startRBNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeOp(nodeId) {
+
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("dresden.sim.type", "rb");
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
+        }
+    };
+
+    public static SimulationScenario gossipNoChurn(int numNodes) {
         SimulationScenario scen = new SimulationScenario() {
             {
                 StochasticProcess systemSetup = new StochasticProcess() {
@@ -139,8 +128,7 @@ public class ScenarioGen {
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
                         eventInterArrivalTime(uniform(1000, 1100));
-                        if (useScala) raise(numNodes, startScalaNodes, new BasicIntSequentialDistribution(1));
-                        else raise(numNodes, startJavaNodes, new BasicIntSequentialDistribution(1));
+                        raise(numNodes, startGossipNode, new BasicIntSequentialDistribution(1));
                     }
                 };
 

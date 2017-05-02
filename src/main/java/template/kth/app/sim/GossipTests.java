@@ -19,7 +19,7 @@ public class GossipTests {
     public void noChurn() {
         int numNodes = 100;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.gossipNoChurn(numNodes, true);
+        SimulationScenario simpleBootScenario = ScenarioGen.gossipNoChurn(numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         for (int i = 1; i <= numNodes; i++) {
