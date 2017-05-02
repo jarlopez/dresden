@@ -15,6 +15,7 @@ public class GossipTests extends BroadcastTest {
         simpleBootScenario.simulate(LauncherComp.class);
 
         checkBEBValidity(numNodes);
-
+        //checkBEBNoDuplication(numNodes)
+        //checkBEBNoCreation(numNodes)
     }
 }

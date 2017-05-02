@@ -15,6 +15,9 @@ public class RBTests extends BroadcastTest {
         simpleBootScenario.simulate(LauncherComp.class);
 
         checkRBValidity(numNodes);
+        //checkRBNoDuplication(numNodes)
+        //checkRBNoCreation(numNodes)
+        checkRBAgreement(numNodes);
     }
 
 }
