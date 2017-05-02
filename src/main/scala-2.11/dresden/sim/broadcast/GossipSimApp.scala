@@ -14,14 +14,12 @@ import se.sics.ktoolbox.util.identifiable.Identifier
 import se.sics.ktoolbox.util.network.KAddress
 import template.kth.app.sim.SimulationResultSingleton
 
+import scala.collection.mutable.ListBuffer
+
 
 object GossipSimApp {
 
     case class Init(selfAdr: KAddress, gradientOId: Identifier) extends se.sics.kompics.Init[GossipSimApp]
-
-    case class Ping() extends KompicsEvent
-
-    case class Pong() extends KompicsEvent
 
 }
 
@@ -34,10 +32,12 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
     val timer = requires[Timer]
     val network = requires[Network]
     val gossip = requires[BestEffortBroadcast]
+
     private val period: Long = 2000 // TODO
-    private var sent = Set.empty[String]
-    private var received = Set.empty[String]
     private var timerId: Option[UUID] = None
+
+    private var sent = new ListBuffer[String]()
+    private var received = new ListBuffer[String]()
 
     override def tearDown(): Unit = {
         killTimer()
@@ -70,7 +70,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
                 logger.info(s"$self received gossip $id")
 
                 import scala.collection.JavaConverters._
-                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
+                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.toList.asJava)
             }
         }
         case anything => handle {
@@ -94,6 +94,6 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         sent += id
 
         import scala.collection.JavaConverters._
-        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
+        SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.toList.asJava)
     }
 }

@@ -19,10 +19,6 @@ object CRBSimApp {
 
     case class Init(selfAdr: KAddress, gradientOId: Identifier) extends se.sics.kompics.Init[CRBSimApp]
 
-    case class Ping() extends KompicsEvent
-
-    case class Pong() extends KompicsEvent
-
 }
 
 class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with StrictLogging {
