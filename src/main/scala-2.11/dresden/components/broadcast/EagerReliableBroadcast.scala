@@ -22,6 +22,7 @@ class EagerReliableBroadcast(init: Init[EagerReliableBroadcast]) extends Compone
 
     rb uponEvent {
         case RB_Broadcast(payload) => handle {
+            logger.debug(s"$self RB_Broadcasting $payload")
             trigger(BEB_Broadcast(OriginatedData(self, payload)) -> beb)
         }
     }
@@ -34,6 +35,7 @@ class EagerReliableBroadcast(init: Init[EagerReliableBroadcast]) extends Compone
             } else {
                 if (!delivered.contains(payload)) {
                     delivered = delivered + payload
+                    logger.debug(s"$self RB_Delivering $payload")
                     trigger(RB_Deliver(origin, payload) -> rb)
                     trigger(BEB_Broadcast(data) -> beb)
                 }

@@ -3,21 +3,22 @@ package dresden.sim.broadcast
 import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{BEB_Broadcast, BEB_Deliver, BestEffortBroadcast}
+import dresden.components.Ports._
 import dresden.sim.SimUtil.{BroadcastPayload, DresdenTimeout}
 import dresden.sim.SimUtil
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
-import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timer}
+import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Timeout, Timer}
 import se.sics.kompics.{KompicsEvent, Start}
+import se.sics.ktoolbox.croupier.CroupierPort
 import se.sics.ktoolbox.util.identifiable.Identifier
 import se.sics.ktoolbox.util.network.KAddress
 import template.kth.app.sim.SimulationResultSingleton
 
 
-object GossipSimApp {
+object RBSimApp {
 
-    case class Init(selfAdr: KAddress, gradientOId: Identifier) extends se.sics.kompics.Init[GossipSimApp]
+    case class Init(selfAdr: KAddress, gradientOId: Identifier) extends se.sics.kompics.Init[RBSimApp]
 
     case class Ping() extends KompicsEvent
 
@@ -25,15 +26,15 @@ object GossipSimApp {
 
 }
 
-class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with StrictLogging {
+class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictLogging {
 
     val self = init match {
-        case GossipSimApp.Init(self, gradientOid) => self
+        case RBSimApp.Init(self, gradientOid) => self
     }
 
     val timer = requires[Timer]
     val network = requires[Network]
-    val gossip = requires[BestEffortBroadcast]
+    val rb = requires[ReliableBroadcast]
 
     private var sent = Set.empty[String]
     private var received = Set.empty[String]
@@ -43,9 +44,9 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
 
     private def sendGossip() = {
         val id: String = UUID.randomUUID().toString
-        logger.info(s"$self triggering gossip $id")
+        logger.info(s"$self triggering rb $id")
         val payload = BroadcastPayload(self, id)
-        trigger(BEB_Broadcast(payload) -> gossip)
+        trigger(BEB_Broadcast(payload) -> rb)
         sent += id
 
         import scala.collection.JavaConverters._
@@ -70,20 +71,9 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         }
     }
 
-    gossip uponEvent {
-        case BEB_Deliver(_, payload@BroadcastPayload(from, id)) => handle {
-            if (received.contains(id)) {
-                logger.warn(s"Duplicated GBEB Deliver message $payload")
-            } else {
-                received += id
-                logger.info(s"$self received gossip $id")
-
-                import scala.collection.JavaConverters._
-                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR,  received.asJava)
-            }
-        }
-        case anything => handle {
-            logger.warn(s"$self unexpected gossip event: $anything")
+    rb uponEvent {
+        case RB_Deliver(src, payload) => handle {
+            logger.info(s"$self RB_Delivering $payload from $src")
         }
     }
 
