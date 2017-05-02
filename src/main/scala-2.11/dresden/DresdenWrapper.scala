@@ -2,7 +2,7 @@ package dresden
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.DresdenWrapper.ExtPort
-import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.Ports.{BestEffortBroadcast, PerfectLink}
 import dresden.components.broadcast.GossippingBasicBroadcast
 import dresden.components.links.PerfectP2PLink
 import se.sics.kompics.network.Network
@@ -72,7 +72,7 @@ class DresdenWrapper(init: Init[DresdenWrapper]) extends ComponentDefinition wit
                 connect(dresden.getNegative(classOf[Timer]), ext.timer, Channel.TWO_WAY)
                 connect(dresden.getNegative(classOf[Network]), ext.network, Channel.TWO_WAY)
                 connect(dresden.getNegative(classOf[CroupierPort]), ext.croupier, Channel.TWO_WAY)
-                connect[GossippingBestEffortBroadcast](gossip -> dresden)
+                connect[BestEffortBroadcast](gossip -> dresden)
             case None =>
                 logger.error("Failed to create application. Exiting")
                 throw new RuntimeException("Application component is None")

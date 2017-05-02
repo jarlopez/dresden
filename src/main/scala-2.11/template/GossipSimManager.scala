@@ -2,7 +2,7 @@ package template
 
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.Ports.{BestEffortBroadcast, PerfectLink}
 import dresden.components.broadcast.GossippingBasicBroadcast
 import dresden.components.links.PerfectP2PLink
 import se.sics.kompics.{Channel, Negative, Positive, Start}
@@ -51,7 +51,7 @@ class GossipSimManager(val init: GossipSimManager.Init) extends ComponentDefinit
     connect(gossip.getNegative(classOf[CroupierPort]), extPorts.croupierPort, Channel.TWO_WAY)
 
     // Application
-    connect[GossippingBestEffortBroadcast](gossip -> appComp)
+    connect[BestEffortBroadcast](gossip -> appComp)
     connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
     connect(appComp.getNegative(classOf[Network]), extPorts.networkPort, Channel.TWO_WAY)
     connect(appComp.getNegative(classOf[CroupierPort]), extPorts.croupierPort, Channel.TWO_WAY)

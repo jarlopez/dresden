@@ -3,7 +3,7 @@ package template
 import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{GBEB_Broadcast, GBEB_Deliver, GossippingBestEffortBroadcast}
+import dresden.components.Ports.{BEB_Broadcast, BEB_Deliver, BestEffortBroadcast}
 import dresden.networking.{PingMessage, PongMessage}
 import dresden.sim.SimUtil
 import se.sics.kompics.network.Network
@@ -35,7 +35,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
     val timer = requires[Timer]
     val network = requires[Network]
     val croupier = requires[CroupierPort]
-    val gossip = requires[GossippingBestEffortBroadcast]
+    val gossip = requires[BestEffortBroadcast]
 
     private var sent = Set.empty[String]
     private var received = Set.empty[String]
@@ -47,7 +47,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         val id: String = UUID.randomUUID().toString
         logger.info(s"$self triggering gossip $id")
         val payload = GossipPayload(self, id)
-        trigger(GBEB_Broadcast(payload) -> gossip)
+        trigger(BEB_Broadcast(payload) -> gossip)
         sent += id
 
         import scala.collection.JavaConverters._
@@ -73,7 +73,7 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
     }
 
     gossip uponEvent {
-        case GBEB_Deliver(_, payload@GossipPayload(from, id)) => handle {
+        case BEB_Deliver(_, payload@GossipPayload(from, id)) => handle {
             if (received.contains(id)) {
                 logger.warn(s"Duplicated GBEB Deliver message $payload")
             } else {

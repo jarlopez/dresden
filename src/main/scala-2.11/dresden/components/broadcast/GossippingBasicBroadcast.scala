@@ -16,7 +16,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 
     type BasicSample = CroupierPort
 
-    val gbeb = provides[GossippingBestEffortBroadcast]
+    val gbeb = provides[BestEffortBroadcast]
 
     val pp2p = requires[PerfectLink]
     val bs = requires[BasicSample]
@@ -34,7 +34,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
     }
 
     gbeb uponEvent {
-        case x: GBEB_Broadcast => handle {
+        case x: BEB_Broadcast => handle {
             logger.debug(s"$self Broadcasting $x")
             past += ((self, x.payload))
         }
@@ -65,7 +65,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
             logger.debug(s"Unseen: ${unseen} vs past: ${past.size}")
             for ( (pp: KAddress, m: KompicsEvent) <- unseen) {
                 logger.info(s"Sending $m")
-                trigger(GBEB_Deliver(pp, m) -> gbeb)
+                trigger(BEB_Deliver(pp, m) -> gbeb)
             }
             past = past union unseen
         }

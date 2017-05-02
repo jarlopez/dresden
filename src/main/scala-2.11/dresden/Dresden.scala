@@ -3,7 +3,7 @@ package dresden
 import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{GBEB_Broadcast, GossippingBestEffortBroadcast}
+import dresden.components.Ports.{BEB_Broadcast, BestEffortBroadcast}
 import se.sics.kompics.Start
 import se.sics.kompics.network.{Network, Transport}
 import se.sics.kompics.sl._
@@ -17,7 +17,7 @@ class Dresden(init: Init[Dresden]) extends ComponentDefinition with StrictLoggin
     val timer = requires[Timer]
     val network = requires[Network]
     val croupier = requires[CroupierPort]
-    val gossip = requires[GossippingBestEffortBroadcast]
+    val gossip = requires[BestEffortBroadcast]
 
     private var timerId: Option[UUID] = None
     private val period: Long = 5000 // TODO

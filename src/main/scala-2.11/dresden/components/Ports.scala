@@ -26,16 +26,6 @@ object Ports {
         request[BEB_Broadcast]
     }
 
-    // Best-Effort Broadcast
-    case class GBEB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
-
-    case class GBEB_Broadcast(payload: KompicsEvent) extends KompicsEvent
-
-    class GossippingBestEffortBroadcast extends Port {
-        indication[GBEB_Deliver]
-        request[GBEB_Broadcast]
-    }
-
     //  Reliable Broadcast
     case class RB_Deliver(src: KAddress, payload: KompicsEvent) extends KompicsEvent
 

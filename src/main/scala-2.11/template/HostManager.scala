@@ -1,7 +1,7 @@
 package template
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.{GossippingBestEffortBroadcast, PerfectLink}
+import dresden.components.Ports.{BestEffortBroadcast, PerfectLink}
 import dresden.components.broadcast.GossippingBasicBroadcast
 import dresden.components.links.PerfectP2PLink
 import org.slf4j.Logger
