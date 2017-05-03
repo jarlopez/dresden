@@ -20,6 +20,6 @@ public class CRBTests extends BroadcastTest {
             System.out.println(key + ": " + res.get(key, Set.class));
         }
 
-//        checkBEBValidity(numNodes);
+//        checkValidity(numNodes);
     }
 }

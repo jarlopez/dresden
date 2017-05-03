@@ -15,10 +15,10 @@ public class BEBChecks {
 
     // If a correct process broadcast a message m,
     // then every correct process eventually delivers m
-    protected static void checkBEBValidity(int numNodes) {
-        checkBEBValidity(numNodes, 0);
+    protected static void checkValidity(int numNodes) {
+        checkValidity(numNodes, 0);
     }
-    protected static void checkBEBValidity(int numNodes, int numChurnNodes) {
+    protected static void checkValidity(int numNodes, int numChurnNodes) {
         // TODO Move format generation/parsing into helper obj for cinsistency
         //  TODO Handle correctness of nodes
         for (int i = 1; i <= numNodes; i++) {
@@ -44,11 +44,11 @@ public class BEBChecks {
         }
     }
     // No message is delivered more than once
-    protected static void checkBEBNoDuplication(int numNodes) {
-        checkBEBNoDuplication(numNodes, 0);
+    protected static void checkNoDuplication(int numNodes) {
+        checkNoDuplication(numNodes, 0);
     }
 
-    protected static void checkBEBNoDuplication(int numNodes, int numChurnNodes) {
+    protected static void checkNoDuplication(int numNodes, int numChurnNodes) {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);
@@ -60,10 +60,10 @@ public class BEBChecks {
 
     // If a process delivers a message m with sender s,
     // then m was previously broadcast by process s
-    protected static void checkBEBNoCreation(int numNodes) {
-        checkBEBNoCreation(numNodes, 0);
+    protected static void checkNoCreation(int numNodes) {
+        checkNoCreation(numNodes, 0);
     }
-    protected static void checkBEBNoCreation(int numNodes, int numChurnNodes) {
+    protected static void checkNoCreation(int numNodes, int numChurnNodes) {
         for (int i = 1; i < numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);

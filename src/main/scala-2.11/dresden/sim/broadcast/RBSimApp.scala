@@ -14,14 +14,12 @@ import se.sics.ktoolbox.util.identifiable.Identifier
 import se.sics.ktoolbox.util.network.KAddress
 import template.kth.app.sim.SimulationResultSingleton
 
+import scala.collection.mutable.ListBuffer
+
 
 object RBSimApp {
 
     case class Init(selfAdr: KAddress, gradientOId: Identifier) extends se.sics.kompics.Init[RBSimApp]
-
-    case class Ping() extends KompicsEvent
-
-    case class Pong() extends KompicsEvent
 
 }
 
@@ -34,10 +32,12 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
     val timer = requires[Timer]
     val network = requires[Network]
     val rb = requires[ReliableBroadcast]
+
     private val period: Long = 2000 // TODO
-    private var sent = Set.empty[String]
-    private var received = Set.empty[String]
     private var timerId: Option[UUID] = None
+
+    private var sent = new ListBuffer[String]()
+    private var received = new ListBuffer[String]()
 
     override def tearDown(): Unit = {
         killTimer()
@@ -64,7 +64,8 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
     rb uponEvent {
         case RB_Deliver(_, payload@BroadcastPayload(src, id)) => handle {
             logger.info(s"$self RB_Delivering $payload from $src")
-            received += id
+            val data = SimUtil.genPeerToIdStr(src, id)
+            received += data
 
             import scala.collection.JavaConverters._
             SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
@@ -84,7 +85,8 @@ class RBSimApp(val init: RBSimApp.Init) extends ComponentDefinition with StrictL
         logger.info(s"$self triggering rb $id")
         val payload = BroadcastPayload(self, id)
         trigger(RB_Broadcast(payload) -> rb)
-        sent += id
+        val data = SimUtil.genPeerToIdStr(self, id)
+        sent += data
 
         import scala.collection.JavaConverters._
         SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)

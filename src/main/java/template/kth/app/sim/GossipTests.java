@@ -20,8 +20,8 @@ public class GossipTests extends BroadcastTest {
             System.out.println(key + ": " + res.get(key, Set.class));
         }
 
-        BEBChecks.checkBEBValidity(numNodes);
-        BEBChecks.checkBEBNoDuplication(numNodes);
-        BEBChecks.checkBEBNoCreation(numNodes);
+        BEBChecks.checkValidity(numNodes);
+        BEBChecks.checkNoDuplication(numNodes);
+        BEBChecks.checkNoCreation(numNodes);
     }
 }

@@ -14,10 +14,10 @@ public class RBTests extends BroadcastTest {
         SimulationScenario simpleBootScenario = ScenarioGen.rbNoChurn(numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
-        checkRBValidity(numNodes);
-        //checkRBNoDuplication(numNodes)
-        //checkRBNoCreation(numNodes)
-        checkRBAgreement(numNodes);
+        RBChecks.checkValidity(numNodes);
+        RBChecks.checkNoDuplication(numNodes);
+        RBChecks.checkNoCreation(numNodes);
+        RBChecks.checkAgreement(numNodes);
     }
 
 }
