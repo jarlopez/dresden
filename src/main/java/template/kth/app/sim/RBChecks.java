@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 // TODO Break up BroadcastTest into static class objects with test methods
 public class RBChecks extends BroadcastTest {
 
-    // TODO Use list, not set (to allow checking RB2)
     // TODO Store tuples of (from, msgId) to allow for RB3
     // TODO Add RB4 Agreement
 
@@ -44,14 +43,13 @@ public class RBChecks extends BroadcastTest {
         BEBChecks.checkNoDuplication(numNodes, numChurnNodes);
     }
 
-    // If a process delivers a messagee m with sender s,
+    // If a process delivers a message m with sender s,
     // then m was previously broadcast by process s
     static void checkNoCreation(int numNodes) {
         checkNoCreation(numNodes, 0);
     }
     static void checkNoCreation(int numNodes, int numChurnNodes) {
-//        fail("TODO");
-        // TODO Could use BEB's
+        BEBChecks.checkNoCreation(numNodes, numChurnNodes);
     }
 
     // If a message m is delivered by some correct process,
