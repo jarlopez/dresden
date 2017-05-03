@@ -10,6 +10,7 @@ val kompicsVersion = "0.9.2-SNAPSHOT"
 val ktoolboxVersion = "2.0.2-SNAPSHOT"
 
 logBuffered in Test := false
+updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 resolvers ++= Seq(
     Resolver.mavenLocal,
@@ -40,5 +41,5 @@ libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "junit" % "junit" % "4.11" % Test,
     "com.novocode" % "junit-interface" % "0.11" % Test
-    exclude("junit", "junit-dep")
 )
+

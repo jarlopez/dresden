@@ -8,7 +8,7 @@ import se.sics.kompics.simulator.run.LauncherComp;
 
 import java.util.Set;
 
-public class CRBTests extends BroadcastTest {
+public class CRBTest extends BroadcastTestBase {
     // TODO Keep track of which nodes are correct in churny tests
 
     @Test

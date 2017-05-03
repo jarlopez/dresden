@@ -1,15 +1,15 @@
 package dresden.sim.checks;
 
 import dresden.sim.SimUtil;
-import dresden.sim.tests.BroadcastTest;
+import dresden.sim.tests.BroadcastTestBase;
 
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-// TODO Break up BroadcastTest into static class objects with test methods
-public class RBChecks extends BroadcastTest {
+// TODO Break up BroadcastTestBase into static class objects with test methods
+public class RBChecks extends BroadcastTestBase {
 
     // TODO Store tuples of (from, msgId) to allow for RB3
     // TODO Add RB4 Agreement

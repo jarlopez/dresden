@@ -2,25 +2,29 @@ package dresden.sim.tests;
 
 import dresden.sim.ScenarioGen;
 import dresden.sim.ScenarioSetup;
-import dresden.sim.checks.RBChecks;
+import dresden.sim.checks.BEBChecks;
 import org.junit.Test;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.run.LauncherComp;
 
-public class RBTests extends BroadcastTest {
+import java.util.Set;
+
+public class GossipTest extends BroadcastTestBase {
     // TODO Keep track of which nodes are correct in churny tests
 
     @Test
     public void noChurn() {
         int numNodes = 3;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.rbNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.gossipNoChurn(numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
-        RBChecks.checkValidity(numNodes);
-        RBChecks.checkNoDuplication(numNodes);
-        RBChecks.checkNoCreation(numNodes);
-        RBChecks.checkAgreement(numNodes);
-    }
+        for (String key : res.keys()) {
+            System.out.println(key + ": " + res.get(key, Set.class));
+        }
 
+        BEBChecks.checkValidity(numNodes);
+        BEBChecks.checkNoDuplication(numNodes);
+        BEBChecks.checkNoCreation(numNodes);
+    }
 }
