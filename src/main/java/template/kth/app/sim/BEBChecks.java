@@ -58,11 +58,31 @@ public class BEBChecks {
         }
     }
 
+    // If a process delivers a message m with sender s,
+    // then m was previously broadcast by process s
     protected static void checkBEBNoCreation(int numNodes) {
         checkBEBNoCreation(numNodes, 0);
     }
     protected static void checkBEBNoCreation(int numNodes, int numChurnNodes) {
-        // TODO
-        fail("Not implemented");
+        for (int i = 1; i < numNodes; i++) {
+            String query = i + SimUtil.RECV_STR();
+            List<String> delivers = res.get(query, List.class);
+            assertNotNull(delivers);
+
+            for (String deliverStr : delivers) {
+                String[] parts = SimUtil.getPeerAndId(deliverStr);
+                String host = parts[0];
+                String peerId = String.valueOf(getPeerNum(host));
+                String sendQuery = peerId + SimUtil.SEND_STR();
+                List<String> sends = res.get(sendQuery, List.class);
+                assertNotNull(delivers);
+                assertTrue("Message was broadcast by process s", sends.contains(deliverStr));
+            }
+        }
+    }
+
+    private static char getPeerNum(String hostIdString) {
+        assertTrue("Input conforms to expected format", hostIdString.contains("<") && hostIdString.contains(">"));
+        return hostIdString.charAt(hostIdString.lastIndexOf('>') - 1);
     }
 }
