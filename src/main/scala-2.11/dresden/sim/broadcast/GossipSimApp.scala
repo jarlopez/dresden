@@ -66,7 +66,8 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
             if (received.contains(id)) {
                 logger.warn(s"Duplicated GBEB Deliver message $payload")
             } else {
-                received += id
+                val data = SimUtil.genPeerToIdStr(from, id)
+                received += data
                 logger.info(s"$self received gossip $id")
 
                 import scala.collection.JavaConverters._
@@ -91,7 +92,9 @@ class GossipSimApp(val init: GossipSimApp.Init) extends ComponentDefinition with
         logger.info(s"$self triggering gossip $id")
         val payload = BroadcastPayload(self, id)
         trigger(BEB_Broadcast(payload) -> gossip)
-        sent += id
+
+        val data = SimUtil.genPeerToIdStr(self, id)
+        sent += data
 
         import scala.collection.JavaConverters._
         SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.toList.asJava)

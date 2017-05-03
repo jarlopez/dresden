@@ -2,9 +2,7 @@ package template.kth.app.sim;
 
 import dresden.sim.SimUtil;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertNotNull;
@@ -12,8 +10,6 @@ import static org.junit.Assert.assertTrue;
 
 // TODO Break up BroadcastTest into static class objects with test methods
 public class BroadcastTest {
-    // TODO Use list, not set (to allow checking BEB2)
-    // TODO Store tuples of (from, msgId) to allow for BEB3
 
     // TODO Use list, not set (to allow checking RB2)
     // TODO Store tuples of (from, msgId) to allow for RB3
@@ -21,56 +17,7 @@ public class BroadcastTest {
 
     protected final SimulationResultMap res = SimulationResultSingleton.getInstance();
 
-
-    // If a correct process broadcast a message m,
-    // then every correct process eventually delivers m
-    protected void checkBEBValidity(int numNodes) {
-        checkBEBValidity(numNodes, 0);
-    }
-    protected void checkBEBValidity(int numNodes, int numChurnNodes) {
-        //  TODO Handle correctness of nodes
-        for (int i = 1; i <= numNodes; i++) {
-            String query = i + SimUtil.SEND_STR();
-            List<String> sends = res.get(query, List.class);
-            assertNotNull(sends);
-            assertTrue("Only one message sent", sends.size() == 1);
-            String id = GossipTests.getOnlyElement(sends);
-
-            //  TODO Handle correctness of nodes
-            for (int j = 1; j <= numNodes; j++) {
-                if (j == i) continue;
-                query = j + SimUtil.RECV_STR();
-                List<String> recvs = res.get(query, List.class);
-
-                assertNotNull(recvs);
-                assertTrue("All messages received at all nodes", recvs.size() == numNodes - 1);
-                assertTrue("Message is received at all other nodes", recvs.contains(id));
-            }
-        }
-    }
-    // No message is delivered more than once
-    protected void checkBEBNoDuplication(int numNodes) {
-        checkBEBNoDuplication(numNodes, 0);
-    }
-
-    protected void checkBEBNoDuplication(int numNodes, int numChurnNodes) {
-        for (int i = 1; i <= numNodes; i++) {
-            String query = i + SimUtil.RECV_STR();
-            List<String> delivers = res.get(query, List.class);
-            assertNotNull(delivers);
-
-            assertTrue("No duplicate messages were delivered", new HashSet<String>(delivers).size() == delivers.size());
-        }
-    }
-
-    protected void checkBEBNoCreation(int numNodes) {
-        checkBEBNoCreation(numNodes, 0);
-    }
-    protected void checkBEBNoCreation(int numNodes, int numChurnNodes) {
-        // TODO
-    }
-
-        // If a correct process p broadcasts a message m,
+    // If a correct process p broadcasts a message m,
     // then p eventually delivers m
     protected void checkRBValidity(int numNodes) {
         checkRBValidity(numNodes, 0);
