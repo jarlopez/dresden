@@ -2,6 +2,7 @@ package dresden.sim.tests;
 
 import dresden.sim.ScenarioGen;
 import dresden.sim.ScenarioSetup;
+import dresden.sim.checks.CRBChecks;
 import org.junit.Test;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.run.LauncherComp;
@@ -22,6 +23,9 @@ public class CRBTest extends BroadcastTestBase {
             System.out.println(key + ": " + res.get(key, Set.class));
         }
 
-//        checkValidity(numNodes);
+        CRBChecks.checkValidity(numNodes);
+        CRBChecks.checkNoDuplication(numNodes);
+        CRBChecks.checkNoCreation(numNodes);
+        CRBChecks.checkAgreement(numNodes);
     }
 }

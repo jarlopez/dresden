@@ -13,6 +13,8 @@ import se.sics.kompics.timer.{CancelPeriodicTimeout, SchedulePeriodicTimeout, Ti
 import se.sics.ktoolbox.util.identifiable.Identifier
 import se.sics.ktoolbox.util.network.KAddress
 
+import scala.collection.mutable.ListBuffer
+
 
 object CRBSimApp {
 
@@ -20,6 +22,8 @@ object CRBSimApp {
 
 }
 
+// TODO Add causality by triggering a response message when receiving one
+// TODO and capture this causality in sim. results singleton (need to decide format)
 class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with StrictLogging {
 
     val self = init match {
@@ -31,9 +35,10 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
     val crb = requires[CausalOrderReliableBroadcast]
 
     private val period: Long = 2000 // TODO
-    private var sent = Set.empty[String]
-    private var received = Set.empty[String]
     private var timerId: Option[UUID] = None
+
+    private var sent = new ListBuffer[String]()
+    private var received = new ListBuffer[String]()
 
     override def tearDown(): Unit = {
         killTimer()
@@ -60,7 +65,8 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
     crb uponEvent {
         case CRB_Deliver(_, payload@BroadcastPayload(src, id)) => handle {
             logger.info(s"$self CRB_Delivering $payload from $src")
-            received += id
+            val data = SimUtil.genPeerToIdStr(src, id)
+            received += data
 
             import scala.collection.JavaConverters._
             SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
@@ -75,14 +81,16 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
         }
     }
 
-    private def sendBroadcast() = {
+    private def sendBroadcast():String = {
         val id: String = UUID.randomUUID().toString
         logger.info(s"$self triggering crb $id")
         val payload = BroadcastPayload(self, id)
         trigger(CRB_Broadcast(payload) -> crb)
-        sent += id
+        val data = SimUtil.genPeerToIdStr(self, id)
+        sent += data
 
         import scala.collection.JavaConverters._
         SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
+        id
     }
 }

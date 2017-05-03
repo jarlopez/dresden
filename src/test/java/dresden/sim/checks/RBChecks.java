@@ -8,7 +8,6 @@ import java.util.List;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-// TODO Break up BroadcastTestBase into static class objects with test methods
 public class RBChecks extends BroadcastTestBase {
 
     // TODO Store tuples of (from, msgId) to allow for RB3

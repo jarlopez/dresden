@@ -11,7 +11,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class BEBChecks {
-    // TODO Store tuples of (from, msgId) to allow for BEB3
 
     protected static final SimulationResultMap res = SimulationResultSingleton.getInstance();
 
