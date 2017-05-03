@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <encoder>
+            <pattern>%date{MM/dd HH:mm:ss.SSS} %-5level[%thread] %logger{1} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!--<logger name="se.sics.kompics.timer.java.JavaTimer" level="INFO"/>-->
+    <!--<logger name="se.sics.ktoolbox.util.network.ports.One2NChannel" level="WARN"/>-->
+    <!--<logger name="se.sics" level="TRACE"/>-->
+
+    <logger name="dresden" level="DEBUG"/>
+    <logger name="se.sics.ktoolbox.croupier" level="ERROR"/>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
