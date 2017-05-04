@@ -39,6 +39,10 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
 
     private var sent = new ListBuffer[String]()
     private var received = new ListBuffer[String]()
+    private var causals = new ListBuffer[String]()
+
+    private var sendCount = 0
+    private val maxSends = 5
 
     override def tearDown(): Unit = {
         killTimer()
@@ -70,6 +74,13 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
 
             import scala.collection.JavaConverters._
             SimulationResultSingleton.getInstance().put(self.getId + SimUtil.RECV_STR, received.asJava)
+
+            if (sendCount < maxSends) {
+                // Broadcast a causally-related message
+                val causalId = sendBroadcast()
+                causals += SimUtil.concat(self.toString, id, causalId)
+                SimulationResultSingleton.getInstance().put(self.getId + SimUtil.CAUSAL_STR, causals.asJava)
+            }
         }
     }
 
@@ -88,6 +99,7 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
         trigger(CRB_Broadcast(payload) -> crb)
         val data = SimUtil.genPeerToIdStr(self, id)
         sent += data
+        sendCount += 1
 
         import scala.collection.JavaConverters._
         SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)

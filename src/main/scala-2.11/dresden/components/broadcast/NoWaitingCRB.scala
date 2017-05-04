@@ -37,7 +37,7 @@ class NoWaitingCRB(init: Init[NoWaitingCRB]) extends ComponentDefinition with St
 
     rb uponEvent {
         case RB_Deliver(src, payload@NoWaitingCRB.DataMessage(mpast, msg)) => handle {
-            if (!delivered.contains(payload)) {
+            if (!delivered.contains(msg)) {
                 for ((s: KAddress, n: KompicsEvent) <- mpast) {
                     if (!delivered.contains(n)) {
                         logger.debug(s"$self delivering $payload")

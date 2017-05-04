@@ -27,5 +27,6 @@ public class CRBTest extends BroadcastTestBase {
         CRBChecks.checkNoDuplication(numNodes);
         CRBChecks.checkNoCreation(numNodes);
         CRBChecks.checkAgreement(numNodes);
+        CRBChecks.checkCausalDelivery(numNodes);
     }
 }
