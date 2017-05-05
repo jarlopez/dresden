@@ -6,6 +6,7 @@ import dresden.sim.SimulationResultMap;
 import dresden.sim.SimulationResultSingleton;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
@@ -23,5 +24,11 @@ public class BroadcastTestBase {
             if (data[1].equals(msgId)) return true;
         }
         return false;
+    }
+
+    public static void printRes() {
+        for (String key : res.keys()) {
+            System.out.println(key + ": " + res.get(key, Set.class));
+        }
     }
 }
