@@ -14,7 +14,7 @@ public class CRBTest extends BroadcastTestBase {
 
     @Test
     public void noChurn() {
-        int numNodes = 3;
+        int numNodes = 10;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.crbNoChurn(numNodes);
         simpleBootScenario.simulate(LauncherComp.class);

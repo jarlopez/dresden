@@ -42,7 +42,7 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
     private var causals = new ListBuffer[String]()
 
     private var sendCount = 0
-    private val maxSends = 5
+    private val maxSends = 10 // TODO
 
     override def tearDown(): Unit = {
         killTimers()

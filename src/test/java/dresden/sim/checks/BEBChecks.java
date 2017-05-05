@@ -74,17 +74,17 @@ public class BEBChecks {
             for (String deliverStr : delivers) {
                 String[] parts = SimUtil.getPeerAndId(deliverStr);
                 String host = parts[0];
-                String peerId = String.valueOf(getPeerNum(host));
+                String peerId = getPeerNum(host);
                 String sendQuery = peerId + SimUtil.SEND_STR();
                 List<String> sends = res.get(sendQuery, List.class);
                 assertNotNull(delivers);
-                assertTrue("Message was broadcast by process s", sends.contains(deliverStr));
+                assertTrue("Message " + deliverStr + " was broadcast by process s(" + sendQuery + ")", sends.contains(deliverStr));
             }
         }
     }
 
-    private static char getPeerNum(String hostIdString) {
+    private static String getPeerNum(String hostIdString) {
         assertTrue("Input conforms to expected format", hostIdString.contains("<") && hostIdString.contains(">"));
-        return hostIdString.charAt(hostIdString.lastIndexOf('>') - 1);
+        return hostIdString.substring(hostIdString.lastIndexOf('<') + 1, hostIdString.lastIndexOf('>'));
     }
 }
