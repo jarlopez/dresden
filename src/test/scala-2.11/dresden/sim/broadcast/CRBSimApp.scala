@@ -35,7 +35,7 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
     val crb = requires[CausalOrderReliableBroadcast]
 
     private val period: Long = 2000 // TODO
-    private var timerId: Option[UUID] = None
+    private var timerIds: Set[UUID] = Set.empty[UUID]
 
     private var sent = new ListBuffer[String]()
     private var received = new ListBuffer[String]()
@@ -45,7 +45,7 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
     private val maxSends = 5
 
     override def tearDown(): Unit = {
-        killTimer()
+        killTimers()
     }
 
     ctrl uponEvent {
@@ -55,14 +55,14 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
             val timeout = DresdenTimeout(spt)
             spt.setTimeoutEvent(timeout)
             trigger(spt -> timer)
-            timerId = Some(timeout.getTimeoutId)
+            timerIds += timeout.getTimeoutId
         }
     }
 
     timer uponEvent {
-        case DresdenTimeout(_) => handle {
+        case it@DresdenTimeout(_) => handle {
             sendBroadcast()
-            killTimer()
+            killTimer(it.getTimeoutId)
         }
     }
 
@@ -78,17 +78,20 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
             if (sendCount < maxSends) {
                 // Broadcast a causally-related message
                 val causalId = sendBroadcast()
+                logger.debug(s"$self CAUSATION: $id -> $causalId")
                 causals += SimUtil.concat(self.toString, id, causalId)
                 SimulationResultSingleton.getInstance().put(self.getId + SimUtil.CAUSAL_STR, causals.asJava)
             }
         }
     }
 
-    private def killTimer() = {
-        timerId match {
-            case Some(id) =>
-                trigger(new CancelPeriodicTimeout(id) -> timer)
-            case None => // Nothing to do
+    private def killTimers() = {
+        timerIds.foreach(killTimer)
+    }
+    private def killTimer(id: UUID) = {
+        if (timerIds.contains(id)) {
+            trigger(new CancelPeriodicTimeout(id) -> timer)
+            timerIds -= id
         }
     }
 
@@ -105,4 +108,6 @@ class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with Stric
         SimulationResultSingleton.getInstance().put(self.getId + SimUtil.SEND_STR, sent.asJava)
         id
     }
+
+    private def genId(): String = s"${self.getId}-$sendCount"
 }
