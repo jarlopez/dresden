@@ -29,9 +29,9 @@ class NoWaitingCRB(init: Init[NoWaitingCRB]) extends ComponentDefinition with St
 
     crb uponEvent {
         case CRB_Broadcast(payload) => handle {
-            logger.debug(s"$self broadcasting $payload")
+            logger.debug(s"$self broadcasting $payload with $past")
             trigger(RB_Broadcast(NoWaitingCRB.DataMessage(past.toList, payload)) -> rb)
-            past += (self, payload)
+            past += ((self, payload))
         }
     }
 
