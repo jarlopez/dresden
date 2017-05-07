@@ -1,7 +1,7 @@
 package dresden.sim.checks;
 
 import dresden.sim.SimUtil;
-import dresden.sim.tests.BroadcastTestBase;
+import dresden.sim.tests.broadcast.BroadcastTestBase;
 
 import java.util.List;
 

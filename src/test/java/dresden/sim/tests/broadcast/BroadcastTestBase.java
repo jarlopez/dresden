@@ -1,4 +1,4 @@
-package dresden.sim.tests;
+package dresden.sim.tests.broadcast;
 
 
 import dresden.sim.SimUtil;

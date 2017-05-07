@@ -8,7 +8,6 @@ import se.sics.ktoolbox.util.network.KAddress
 
 import scala.collection.mutable.ListBuffer
 
-// TODO Data type?
 object NoWaitingCRB {
 
     case class DataMessage(past: List[Any], payload: KompicsEvent) extends KompicsEvent
