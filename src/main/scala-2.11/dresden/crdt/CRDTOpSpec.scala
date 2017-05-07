@@ -1,6 +1,8 @@
 package dresden.crdt
 
 
+import dresden.crdt.CRDT.CRDTOperation
+
 import scala.util.{Success, Try}
 
 trait CRDTOpSpec[T, V] {
@@ -11,8 +13,8 @@ trait CRDTOpSpec[T, V] {
 
     def precondition: Boolean = true
 
-    def prepare(op: Any, state: T): Try[Any] = Success(op)
+    def prepare(op: CRDTOperation, state: T): Try[CRDTOperation] = Success(op)
 
-    def effect(op: Any, state: T): T = state
+    def effect(op: CRDTOperation, state: T): T = state
 
 }

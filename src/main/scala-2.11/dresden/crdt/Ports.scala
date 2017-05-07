@@ -12,7 +12,8 @@ object Ports {
     case class Op(id: String, op: CRDTOperation) extends KompicsEvent
     case class Response(id: String, payload: Any) extends KompicsEvent
 
-    class GSetManagement extends Port {
+    trait CRDTManagement extends Port
+    class GSetManagement extends CRDTManagement {
         indication[Response]
         request[Op]
         request[Get]

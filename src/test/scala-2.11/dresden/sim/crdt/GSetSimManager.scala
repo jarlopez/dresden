@@ -4,7 +4,6 @@ import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BestEffortBroadcast, CausalOrderReliableBroadcast, PerfectLink, ReliableBroadcast}
 import dresden.components.broadcast.{EagerReliableBroadcast, GossippingBasicBroadcast, NoWaitingCRB}
 import dresden.components.links.PerfectP2PLink
-import dresden.crdt.{CRDTInit, CRDTManager}
 import dresden.crdt.Ports.GSetManagement
 import dresden.crdt.set.{GSet, GSetManager}
 import dresden.sim.crdt.GSetSimManager.ExtPort

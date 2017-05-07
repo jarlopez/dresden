@@ -1,31 +1,31 @@
 package dresden.crdt
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.components.Ports.CausalOrderReliableBroadcast
-import dresden.crdt.CRDT.{CRDTOpMsg, CRDTOperation}
-import se.sics.kompics.KompicsEvent
+import dresden.components.Ports.{CRB_Broadcast, CRB_Deliver, CausalOrderReliableBroadcast}
+import dresden.crdt.CRDT.CRDTOperation
+import dresden.crdt.Ports._
+import se.sics.kompics.Start
 import se.sics.kompics.sl._
-import se.sics.ktoolbox.util.network.KAddress
 
 import scala.collection.mutable
 import scala.util.{Failure, Success}
 
-case class CRDTInit()
 
-abstract class CRDTManager[T, V](init: CRDTManager.Init[T, V]) extends ComponentDefinition with StrictLogging {
+abstract class CRDTManager[T, V](init: Init[CRDTManager[T, V]]) extends ComponentDefinition with StrictLogging {
+
+    val mgmt: NegativePort[_ <: CRDTManagement]
 
     val crb = requires[CausalOrderReliableBroadcast]
 
     val crdts: mutable.Map[String, T] = mutable.Map.empty[String, T]
 
     val self = init match {
-        case CRDTManager.Init(s) => s
+        case Init(s) => s
     }
 
     def get(id: String): T = crdts.get(id) match {
         case Some(crdt) => crdt
         case None =>
-            logger.debug(s"Creating new CRDT($id)")
             val crdt = ops.create()
             crdts.put(id, crdt)
             crdt
@@ -36,9 +36,9 @@ abstract class CRDTManager[T, V](init: CRDTManager.Init[T, V]) extends Component
     def op(id: String, op: CRDTOperation): Unit = crdts.get(id) match {
         case Some(crdt) =>
             ops.prepare(op, crdt) match {
-                case Success(msg: KompicsEvent) =>
+                case Success(msg: CRDTOperation) =>
                     logger.debug(s"$self triggering msg after prepare phase")
-                    val wrapper = CRDTOpMsg(id, msg)
+                    val wrapper = CRB_Broadcast(Op(id, msg))
                     trigger(wrapper -> crb)
                 case Failure(msg) => logger.warn(s"$self Failed to prepare operation $op on $id")
                 case any => logger.warn(s"$self Got something else: $any")
@@ -46,14 +46,29 @@ abstract class CRDTManager[T, V](init: CRDTManager.Init[T, V]) extends Component
         case _ => logger.warn(s"CRDT $id not found")
     }
 
-    crb uponEvent {
-        // TODO
-        case CRDTOpMsg(crdtId, msg) => handle {
-                logger.debug(s"$self Handling CRDT operation")
+    ctrl uponEvent {
+        case _: Start => handle {
+            mgmt uponEvent {
+                case Get(id) => handle {
+                    logger.debug(s"Received GET$id request")
+                    val res = get(id)
+                    trigger(Response(id, res) -> mgmt)
+                }
+                case Op(id, cmd: CRDTOperation) => handle {
+                    logger.debug(s"Handling cmd for $id")
+                    op(id, cmd)
+                }
+            }
         }
     }
-}
 
-object CRDTManager {
-    case class Init[T, V](self: KAddress) extends se.sics.kompics.Init[CRDTManager[T, V]]
+    crb uponEvent {
+        case CRB_Deliver(from, Op(id, msg)) => handle {
+            logger.debug(s"$self Handling CRDT operation")
+            val updated = ops.effect(msg, get(id))
+            crdts.put(id, updated)
+            logger.info(s"$self now has: ${get(id)}")
+        }
+    }
+
 }
