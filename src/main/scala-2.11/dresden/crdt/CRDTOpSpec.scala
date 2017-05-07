@@ -1,10 +1,11 @@
 package dresden.crdt
 
-import dresden.crdt.CRDT.OpBasedCRDT
 
 import scala.util.{Success, Try}
 
-trait CRDTOpSpec[T <: OpBasedCRDT, V] {
+trait CRDTOpSpec[T, V] {
+
+    def create(): T
 
     def query(state: T): V
 

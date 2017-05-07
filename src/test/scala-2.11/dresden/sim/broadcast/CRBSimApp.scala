@@ -22,8 +22,6 @@ object CRBSimApp {
 
 }
 
-// TODO Add causality by triggering a response message when receiving one
-// TODO and capture this causality in sim. results singleton (need to decide format)
 class CRBSimApp(val init: CRBSimApp.Init) extends ComponentDefinition with StrictLogging {
 
     val self = init match {

@@ -1,17 +1,20 @@
 package dresden.crdt
 
+import dresden.crdt.CRDT.CRDTOperation
 import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl.Port
 import se.sics.ktoolbox.util.network.KAddress
 
 object Ports {
     // CRDT Management
-    case class GSet_Add(src: KAddress, payload: KompicsEvent) extends KompicsEvent
 
-    case class CRDT_OpDelivery(payload: KompicsEvent) extends KompicsEvent
+    case class Get(id: String) extends KompicsEvent
+    case class Op(id: String, op: CRDTOperation) extends KompicsEvent
+    case class Response(id: String, payload: Any) extends KompicsEvent
 
     class GSetManagement extends Port {
-        indication[GSet_Add]
-        request[CRDT_OpDelivery ]
+        indication[Response]
+        request[Op]
+        request[Get]
     }
 }
