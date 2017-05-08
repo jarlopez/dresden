@@ -1,14 +1,14 @@
 package dresden.sim.checks;
 
 import dresden.sim.SimUtil;
-import dresden.sim.tests.broadcast.BroadcastTestBase;
+import dresden.sim.TestBase;
 
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class CRBChecks extends BroadcastTestBase {
+public class CRBChecks extends TestBase {
     // CRB1 - CRB4 same as RB1 - RB4
 
     public static void checkValidity(int numNodes) {

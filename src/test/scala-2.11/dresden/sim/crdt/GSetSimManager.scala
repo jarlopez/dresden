@@ -43,7 +43,6 @@ class GSetSimManager(val init: GSetSimManager.Init) extends ComponentDefinition 
     val gossip = create(classOf[GossippingBasicBroadcast], new Init[GossippingBasicBroadcast](self))
     val rb = create(classOf[EagerReliableBroadcast], new Init[EagerReliableBroadcast](self))
     val crb = create(classOf[NoWaitingCRB], new Init[NoWaitingCRB](self))
-//    val mngr = create(classOf[GSetManager[String]], new CRDTManager.Init(self)) // XXX FIXME TODO AAAA
     val mngr = create(classOf[GSetManager[String]], new Init[GSetManager[String]](self))
     val appComp = create(classOf[GSetSimApp], GSetSimApp.Init(self))
 

@@ -70,6 +70,7 @@ abstract class CRDTManager[T, V](init: Init[CRDTManager[T, V]]) extends Componen
             val updated = ops.effect(msg, get(id))
             crdts.put(id, updated)
             logger.info(s"$self now has: ${get(id)}")
+            trigger(Update(id, updated) -> mgmt)
         }
     }
 

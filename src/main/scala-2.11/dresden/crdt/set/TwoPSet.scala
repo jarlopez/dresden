@@ -3,6 +3,8 @@ package dresden.crdt.set
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import dresden.crdt.Ports.TwoPSetManagement
+import dresden.networking.MessageCheck
+import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl.Init
 import se.sics.ktoolbox.util.network.KAddress
 
@@ -51,6 +53,7 @@ object TwoPSetManager {
 }
 
 class TwoPSetManager[V](init: Init[CRDTManager[TwoPSet[V], Set[V]]]) extends CRDTManager[TwoPSet[V], Set[V]](init) {
+    trait VLike extends MessageCheck[V] with KompicsEvent
 
     case class AddOperation(e: Any) extends CRDTOperation
     case class RemoveOperation(e: Any) extends CRDTOperation
@@ -69,7 +72,7 @@ class TwoPSetManager[V](init: Init[CRDTManager[TwoPSet[V], Set[V]]]) extends CRD
         }
 
         override def prepare(op: CRDTOperation, state: TwoPSet[V]): Try[Option[Any]] = op match {
-            case AddOperation(it: V) =>
+            case AddOperation(it: V)     =>
                 if (state.query(it)) Success(Some(op))
                 else Failure(new Exception("The set does not contain the element."))
             case _ => super.prepare(op, state)
@@ -89,4 +92,5 @@ class TwoPSetManager[V](init: Init[CRDTManager[TwoPSet[V], Set[V]]]) extends CRD
         }
     }
 }
+
 

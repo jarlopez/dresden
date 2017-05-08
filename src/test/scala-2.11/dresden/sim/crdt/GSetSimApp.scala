@@ -1,9 +1,10 @@
 package dresden.sim.crdt
 
 import com.typesafe.scalalogging.StrictLogging
-import dresden.crdt.Ports.{GSetManagement, Get, Op, Response}
+import dresden.crdt.Ports._
 import dresden.crdt.set.{AddOperation, GSet}
-import se.sics.kompics.Start
+import dresden.sim.{SimUtil, SimulationResultSingleton}
+import se.sics.kompics.{Start, Stop}
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.util.network.KAddress
 
@@ -16,14 +17,14 @@ object GSetSimApp {
 
 class GSetSimApp(val init: GSetSimApp.Init) extends ComponentDefinition with StrictLogging {
 
+    var gset: Option[GSet[String]] = None
+
     val self = init match {
         case GSetSimApp.Init(self) => self
     }
 
     val mngr = requires[GSetManagement]
 
-    override def tearDown(): Unit = {
-    }
 
     ctrl uponEvent {
         case _: Start => handle {
@@ -33,10 +34,16 @@ class GSetSimApp(val init: GSetSimApp.Init) extends ComponentDefinition with Str
     }
 
     mngr uponEvent {
-        case Response(id, crdt) => handle {
+        case Response(id, crdt: GSet[String]) => handle {
+            gset = Some(crdt)
             logger.info(s"$self Received $crdt")
             trigger(Op("johan", AddOperation(self.toString)) -> mngr)
-
+        }
+        case Update(id, crdt: GSet[String]) => handle {
+            logger.info(s"Received CRDT update for $id")
+            gset = Some(crdt)
+            import scala.collection.JavaConverters._
+            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.GSET_STR, crdt.entries.asJava)
         }
     }
 

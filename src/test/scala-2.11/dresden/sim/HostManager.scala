@@ -66,7 +66,6 @@ class HostManager(val init: HostManager.Init) extends ComponentDefinition with S
                     ),
                     selfAdr, croupierId))
         case "gset" =>
-            // TODO
             create(classOf[GSetSimManager],
                 GSetSimManager.Init(
                     GSetSimManager.ExtPort(

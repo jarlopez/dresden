@@ -1,16 +1,12 @@
-package dresden.sim.tests.broadcast;
+package dresden.sim;
 
-
-import dresden.sim.SimUtil;
-import dresden.sim.SimulationResultMap;
-import dresden.sim.SimulationResultSingleton;
 
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class BroadcastTestBase {
+public class TestBase {
 
     protected static final SimulationResultMap res = SimulationResultSingleton.getInstance();
 

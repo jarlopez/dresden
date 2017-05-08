@@ -1,15 +1,19 @@
 package dresden.crdt.set
 
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe._
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.Ports._
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
+import dresden.networking.MessageCheck
+import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.util.network.KAddress
 
 case class AddOperation(e: Any) extends CRDTOperation
 case class QueryOperation(e: Any) extends CRDTOperation
 
-case class GSet[T](entries: Set[T] = Set.empty[T]) extends OpBasedCRDT {
+case class GSet[T](var entries: Set[T] = Set.empty[T]) extends OpBasedCRDT {
 
     def add(e: T): GSet[T] = {
         copy(entries = entries + e)
@@ -38,6 +42,7 @@ class GSetManager[V](init: Init[CRDTManager[GSet[V], Set[V]]]) extends CRDTManag
     override val mgmt = provides[GSetManagement]
 
     override def ops: CRDTOpSpec[GSet[V], Set[V]] = new CRDTOpSpec[GSet[V], Set[V]] {
+
         override def query(state: GSet[V]): Set[V] = {
             state.entries
         }

@@ -8,6 +8,7 @@ object SimUtil {
     val RECV_STR: String = "-recv"
     val SEND_STR: String = "-sent"
     val CAUSAL_STR: String = "-caused"
+    val GSET_STR: String = "-gset"
     val DELIM_STR: String = "::"
 
     case class DresdenTimeout(spt: SchedulePeriodicTimeout) extends Timeout(spt)

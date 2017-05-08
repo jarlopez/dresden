@@ -2,12 +2,13 @@ package dresden.sim.tests.broadcast;
 
 import dresden.sim.ScenarioGen;
 import dresden.sim.ScenarioSetup;
+import dresden.sim.TestBase;
 import dresden.sim.checks.RBChecks;
 import org.junit.Test;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.run.LauncherComp;
 
-public class RBTest extends BroadcastTestBase {
+public class RBTest extends TestBase {
     // TODO Keep track of which nodes are correct in churny tests
 
     @Test
