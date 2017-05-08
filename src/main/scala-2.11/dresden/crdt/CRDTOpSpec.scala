@@ -13,7 +13,7 @@ trait CRDTOpSpec[T, V] {
 
     def precondition: Boolean = true
 
-    def prepare(op: CRDTOperation, state: T): Try[CRDTOperation] = Success(op)
+    def prepare(op: CRDTOperation, state: T): Try[Option[Any]] = Success(Some(op))
 
     def effect(op: CRDTOperation, state: T): T = state
 

@@ -7,6 +7,7 @@ import se.sics.ktoolbox.util.network.KAddress
 
 object Ports {
     // CRDT Management
+    // TODO Could merge Get into Op
 
     case class Get(id: String) extends KompicsEvent
     case class Op(id: String, op: CRDTOperation) extends KompicsEvent
@@ -14,6 +15,11 @@ object Ports {
 
     trait CRDTManagement extends Port
     class GSetManagement extends CRDTManagement {
+        indication[Response]
+        request[Op]
+        request[Get]
+    }
+    class TwoPSetManagement extends CRDTManagement {
         indication[Response]
         request[Op]
         request[Get]

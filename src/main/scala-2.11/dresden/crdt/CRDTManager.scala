@@ -36,10 +36,12 @@ abstract class CRDTManager[T, V](init: Init[CRDTManager[T, V]]) extends Componen
     def op(id: String, op: CRDTOperation): Unit = crdts.get(id) match {
         case Some(crdt) =>
             ops.prepare(op, crdt) match {
-                case Success(msg: CRDTOperation) =>
+                case Success(Some(msg: CRDTOperation)) =>
                     logger.debug(s"$self triggering msg after prepare phase")
                     val wrapper = CRB_Broadcast(Op(id, msg))
                     trigger(wrapper -> crb)
+                case Success(None) =>
+                    logger.debug(s"$self got None back from prepare, skipping effects.")
                 case Failure(msg) => logger.warn(s"$self Failed to prepare operation $op on $id")
                 case any => logger.warn(s"$self Got something else: $any")
             }
