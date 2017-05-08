@@ -43,7 +43,6 @@ class CRDTSimManager(val init: CRDTSimManager.Init) extends ComponentDefinition 
     val gossip = create(classOf[GossippingBasicBroadcast], new Init[GossippingBasicBroadcast](self))
     val rb = create(classOf[EagerReliableBroadcast], new Init[EagerReliableBroadcast](self))
     val crb = create(classOf[NoWaitingCRB], new Init[NoWaitingCRB](self))
-    val mngr = create(classOf[TwoPSetManager[String]], new Init[TwoPSetManager[String]](self))
 
 
 
@@ -60,23 +59,23 @@ class CRDTSimManager(val init: CRDTSimManager.Init) extends ComponentDefinition 
     // No-waiting causal reliable broadcast
     connect[ReliableBroadcast](rb -> crb)
 
-    // CRDT Manager
-    connect[CausalOrderReliableBroadcast](crb -> mngr)
-
     // Application
     config.getValue("dresden.dresden.sim.crdt.target", classOf[String]) match {
         case "gset" =>
+            val mngr = create(classOf[GSetManager[String]], new Init[GSetManager[String]](self))
             val appComp = create(classOf[GSetSimApp], GSetSimApp.Init(self))
+
+            connect[CausalOrderReliableBroadcast](crb -> mngr)
             connect[GSetManagement](mngr -> appComp)
         case "twopset" =>
+            val mngr = create(classOf[TwoPSetManager[String]], new Init[TwoPSetManager[String]](self))
             val appComp = create(classOf[TwoPSetSimApp], TwoPSetSimApp.Init(self))
+
+            connect[CausalOrderReliableBroadcast](crb -> mngr)
             connect[TwoPSetManagement](mngr -> appComp)
             connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
     }
 
-
-    connect[TwoPSetManagement](mngr -> appComp)
-    connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
 
 
     var pendingCroupierConnReq: OMngrCroupier.ConnectRequest = _

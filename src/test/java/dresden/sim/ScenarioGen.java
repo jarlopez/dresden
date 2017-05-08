@@ -17,6 +17,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ScenarioGen {
+    public enum CRDTTestType {
+        GSET,
+        TWOPSET,
+    }
 
     // TODO Pull out common ones
     static Operation<SetupEvent> systemSetupOp = (Operation<SetupEvent>) () -> new SetupEvent() {
@@ -90,6 +94,20 @@ public class ScenarioGen {
         public Map<String, Object> initConfigUpdate() {
             Map<String, Object> nodeConfig = new HashMap<>();
             nodeConfig.put("dresden.dresden.sim.type", "crdt");
+            nodeConfig.put("dresden.dresden.sim.crdt.target", "gset");
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
+        }
+    };
+    static Operation1<StartNodeEvent, Integer> startTwoPSetNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeOp(nodeId) {
+
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("dresden.dresden.sim.type", "crdt");
+            nodeConfig.put("dresden.dresden.sim.crdt.target", "twopset");
             nodeConfig.put("system.id", nodeId);
             nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
             nodeConfig.put("system.port", ScenarioSetup.appPort);
@@ -190,7 +208,7 @@ public class ScenarioGen {
     }
 
     // CRDT
-    public static SimulationScenario gsetNoChurn(int numNodes) {
+    public static SimulationScenario crdtSetNoChurn(CRDTTestType type, int numNodes) {
 
         return new SimulationScenario() {
             {
@@ -209,7 +227,14 @@ public class ScenarioGen {
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
                         eventInterArrivalTime(uniform(1000, 1100));
-                        raise(numNodes, startGSetNode, new BasicIntSequentialDistribution(1));
+                        switch (type) {
+                            case GSET:
+                                raise(numNodes, startGSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case TWOPSET:
+                                raise(numNodes, startTwoPSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                        }
                     }
                 };
 

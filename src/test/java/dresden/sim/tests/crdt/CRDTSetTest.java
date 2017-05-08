@@ -16,27 +16,23 @@ public class CRDTSetTest extends TestBase {
     public void gset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.gsetNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.GSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
-        Set<String> prev = null;
-        for (String key : res.keys()) {
-            Set<String> it = res.get(key, Set.class);
-            if (prev == null) {
-                prev = it;
-            } else {
-                assertTrue(prev.containsAll(it));
-            }
-        }
+        assertAllSetsSame();
     }
 
     @Test
     public void twopset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.gsetNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.TWOPSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
+        assertAllSetsSame();
+    }
+
+    private void assertAllSetsSame() {
         Set<String> prev = null;
         for (String key : res.keys()) {
             Set<String> it = res.get(key, Set.class);

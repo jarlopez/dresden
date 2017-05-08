@@ -2,7 +2,7 @@ package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.sim.broadcast.{CRBSimManager, GossipSimManager, RBSimManager}
-import dresden.sim.crdt.CRDTSimManager$
+import dresden.sim.crdt.{CRDTSimManager}
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
