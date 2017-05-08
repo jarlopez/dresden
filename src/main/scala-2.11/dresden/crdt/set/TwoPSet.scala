@@ -58,14 +58,14 @@ object TwoPSetManager {
 }
 
 class TwoPSetManager[V](init: Init[CRDTManager[TwoPSet[V], Set[V]]]) extends CRDTManager[TwoPSet[V], Set[V]](init) {
-    trait VLike extends MessageCheck[V] with KompicsEvent
+
+    override val mgmt = provides[TwoPSetManagement]
 
     // Hack to convert init to CRDTManagers's init
     def this(it: TwoPSetManager.Init) = {
         this(new Init[CRDTManager[TwoPSet[V], Set[V]]](it.self))
     }
 
-    override val mgmt = provides[TwoPSetManagement]
 
     override def ops: CRDTOpSpec[TwoPSet[V], Set[V]] = new CRDTOpSpec[TwoPSet[V], Set[V]] {
         override def query(state: TwoPSet[V]): Set[V] = {
