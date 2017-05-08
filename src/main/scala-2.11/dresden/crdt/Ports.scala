@@ -3,7 +3,6 @@ package dresden.crdt
 import dresden.crdt.CRDT.CRDTOperation
 import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl.Port
-import se.sics.ktoolbox.util.network.KAddress
 
 object Ports {
     // CRDT Management
@@ -23,8 +22,6 @@ object Ports {
         request[Get]
     }
     class TwoPSetManagement extends CRDTManagement {
-        indication[Response]
-        request[Op]
         request[Get]
     }
 }

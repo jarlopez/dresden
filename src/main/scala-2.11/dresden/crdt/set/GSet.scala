@@ -1,17 +1,11 @@
 package dresden.crdt.set
 
-import scala.reflect.ClassTag
-import scala.reflect.runtime.universe._
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.Ports._
+import dresden.crdt.set.GSetManager.AddOperation
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
-import dresden.networking.MessageCheck
-import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl._
 import se.sics.ktoolbox.util.network.KAddress
-
-case class AddOperation(e: Any) extends CRDTOperation
-case class QueryOperation(e: Any) extends CRDTOperation
 
 case class GSet[T](var entries: Set[T] = Set.empty[T]) extends OpBasedCRDT {
 
@@ -30,6 +24,10 @@ object GSet {
 
 object GSetManager {
     case class Init(self: KAddress)
+
+    case class AddOperation(e: Any) extends CRDTOperation
+    case class QueryOperation(e: Any) extends CRDTOperation
+
 }
 
 class GSetManager[V](init: Init[CRDTManager[GSet[V], Set[V]]]) extends CRDTManager[GSet[V], Set[V]](init) {

@@ -11,6 +11,8 @@ object SimUtil {
     val GSET_STR: String = "-gset"
     val DELIM_STR: String = "::"
 
+    val CRDT_SET_KEY: String = "test"
+
     case class DresdenTimeout(spt: SchedulePeriodicTimeout) extends Timeout(spt)
 
     case class BroadcastPayload(from: KAddress, id: String) extends KompicsEvent {

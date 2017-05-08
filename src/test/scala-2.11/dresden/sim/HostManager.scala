@@ -2,7 +2,7 @@ package dresden.sim
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.sim.broadcast.{CRBSimManager, GossipSimManager, RBSimManager}
-import dresden.sim.crdt.GSetSimManager
+import dresden.sim.crdt.CRDTSimManager$
 import se.sics.kompics.network.Network
 import se.sics.kompics.sl._
 import se.sics.kompics.timer.Timer
@@ -65,10 +65,10 @@ class HostManager(val init: HostManager.Init) extends ComponentDefinition with S
                         overlayMngrComp.getNegative(classOf[OverlayViewUpdatePort])
                     ),
                     selfAdr, croupierId))
-        case "gset" =>
-            create(classOf[GSetSimManager],
-                GSetSimManager.Init(
-                    GSetSimManager.ExtPort(
+        case "crdt" =>
+            create(classOf[CRDTSimManager],
+                CRDTSimManager.Init(
+                    CRDTSimManager.ExtPort(
                         timerPort,
                         networkPort,
                         overlayMngrComp.getPositive(classOf[CroupierPort]),

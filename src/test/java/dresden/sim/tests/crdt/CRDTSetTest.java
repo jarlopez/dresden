@@ -11,9 +11,27 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class GSetTest extends TestBase {
+public class CRDTSetTest extends TestBase {
     @Test
-    public void basic() {
+    public void gset() {
+        int numNodes = 2;
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.gsetNoChurn(numNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        Set<String> prev = null;
+        for (String key : res.keys()) {
+            Set<String> it = res.get(key, Set.class);
+            if (prev == null) {
+                prev = it;
+            } else {
+                assertTrue(prev.containsAll(it));
+            }
+        }
+    }
+
+    @Test
+    public void twopset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.gsetNoChurn(numNodes);

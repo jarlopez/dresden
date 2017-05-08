@@ -89,7 +89,7 @@ public class ScenarioGen {
         @Override
         public Map<String, Object> initConfigUpdate() {
             Map<String, Object> nodeConfig = new HashMap<>();
-            nodeConfig.put("dresden.dresden.sim.type", "gset");
+            nodeConfig.put("dresden.dresden.sim.type", "crdt");
             nodeConfig.put("system.id", nodeId);
             nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
             nodeConfig.put("system.port", ScenarioSetup.appPort);
@@ -216,7 +216,7 @@ public class ScenarioGen {
                 systemSetup.start();
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(10000, startPeers);
+                terminateAfterTerminationOf(50000, startPeers); // Needs to be long enough to guarantee eventual consistency
             }
         };
     }
