@@ -1,5 +1,7 @@
 package dresden.crdt.set
 
+import java.util.UUID
+
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import dresden.crdt.Ports.ORSetManagement
@@ -33,11 +35,20 @@ import scala.util.{Failure, Success, Try}
 
 case class ORSet[T](entries: Set[(T, String)] = Set.empty[(T, String)]) extends OpBasedCRDT {
 
-    def add(e: T): ORSet[T] = ???
+    def add(e: (T, String)): ORSet[T] = {
+        copy(entries = entries + e)
+    }
 
-    def query(e: T): Boolean = ???
+    def query(e: T): Boolean = {
+        entries.toMap.get(e) match {
+            case Some(_) => true
+            case None => false
+        }
+    }
 
-    def remove(e: T): ORSet[T] = ???
+    def remove(e: Set[(T, String)]): ORSet[T] = {
+        copy(entries = entries  -- e)
+    }
 }
 
 object ORSet {
@@ -61,12 +72,24 @@ class ORSetManager[V](init: Init[CRDTManager[ORSet[V], Set[V]]]) extends CRDTMan
         this(new Init[CRDTManager[ORSet[V], Set[V]]](it.self))
     }
 
-
     override def ops: CRDTOpSpec[ORSet[V], Set[V]] = new CRDTOpSpec[ORSet[V], Set[V]] {
-        override def query(state: ORSet[V]): Set[V] = ???
+        override def query(state: ORSet[V]): Set[V] = {
+            state.entries.map(it => it._1)
+        }
         
         override def prepare(op: CRDTOperation, state: ORSet[V]): Try[Option[Any]] = op match {
-            // TODO
+            case AddOperation(it: V) =>
+                val alpha: String = UUID.randomUUID().toString
+                Success(Some(AddOperation(it, alpha)))
+            case RemoveOperation(it: V) =>
+                if (state.query(it)) {
+                    state.entries.find(it => it._1.equals(it)) match {
+                        case Some(els) => Success(Some(RemoveOperation(els)))
+                        case None => Failure(new Throwable("No data to remove"))
+                    }
+                } else {
+                    Failure(new Throwable("Not found, won't push downstream."))
+                }
             case _ => super.prepare(op, state)
         }
 
