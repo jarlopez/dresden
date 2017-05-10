@@ -83,4 +83,9 @@ public class SimulationResultSingleton implements SimulationResultMap {
         return entries.keySet();
     }
 
+    @Override
+    public void clear() {
+        this.entries.clear();
+    }
+
 }

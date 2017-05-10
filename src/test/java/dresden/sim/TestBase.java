@@ -1,6 +1,8 @@
 package dresden.sim;
 
 
+import org.junit.Before;
+
 import java.util.List;
 import java.util.Set;
 
@@ -9,6 +11,11 @@ import static org.junit.Assert.assertTrue;
 public class TestBase {
 
     protected static final SimulationResultMap res = SimulationResultSingleton.getInstance();
+
+    @Before
+    public void initObjects() {
+        res.clear();
+    }
 
     /**
      * Stupid O(n) search for message ID based on peerId::msgId
