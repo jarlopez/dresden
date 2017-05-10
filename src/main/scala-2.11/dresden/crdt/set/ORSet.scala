@@ -11,22 +11,23 @@ import se.sics.ktoolbox.util.network.KAddress
 
 import scala.util.{Failure, Success, Try}
 
-/* U-Set: Op-based 2P-Set with unique elements
-1   payload set S
+/* Op-Based Observed-Remove Set
+1   payload set S                           ⊲ set of pairs { (element e, unique-tag u) ... }
 2       initial ∅
 3   query lookup (element e) : boolean b
-4       let b = (e ∈ S)
+4       let b = (∃u : (e, u) ∈ S)
 5   update add (element e)
 6       atSource (e)
-7           pre e is unique
-8       downstream (e)
-9           S := S ∪ {e}
+7           let a = unique()                ⊲ unique() returns a unique value
+8       downstream (e, a)
+9           S := S ∪ {(e, a)}
 10  update remove (element e)
 11      atSource (e)
-12          pre lookup(e) ⊲ 2P-Set precondition
-13      downstream (e)
-14          pre add(e) has been delivered ⊲ Causal order suffices
-15          S := S \ {e}
+12          pre lookup(e)                   ⊲ 2P-Set precondition
+13          let R = {(e, u)| ∃u : (e, u) ∈ S}
+14      downstream (R)
+15          pre ∀(e, u) ∈ R: add(e) has been delivered  ⊲ Causal order suffices
+16          S := S \ {e}                    ⊲ Remove pairs observed at source
  */
 
 
