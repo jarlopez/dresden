@@ -4,8 +4,8 @@ import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.crdt.Ports._
-import dresden.crdt.set.TwoPSet
-import dresden.crdt.set.TwoPSetManager.{AddOperation, RemoveOperation}
+import dresden.crdt.set.{ORSet, TwoPSet}
+import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
 import dresden.sim.SimUtil.DresdenTimeout
 import dresden.sim.{SimUtil, SimulationResultSingleton}
 import se.sics.kompics.Start
@@ -14,21 +14,21 @@ import se.sics.kompics.timer.{SchedulePeriodicTimeout, Timer}
 import se.sics.ktoolbox.util.network.KAddress
 
 
-object TwoPSetSimApp {
+object ORSetSimApp {
 
-    case class Init(selfAdr: KAddress) extends se.sics.kompics.Init[TwoPSetSimApp]
+    case class Init(selfAdr: KAddress) extends se.sics.kompics.Init[ORSetSimApp]
 
 }
 
-class TwoPSetSimApp(val init: TwoPSetSimApp.Init) extends ComponentDefinition with StrictLogging {
+class ORSetSimApp(val init: ORSetSimApp.Init) extends ComponentDefinition with StrictLogging {
 
-    val mngr = requires[TwoPSetManagement]
+    val mngr = requires[ORSetManagement]
     val timer = requires[Timer]
 
-    var twopset: Option[TwoPSet[String]] = None
+    var orset: Option[ORSet[String]] = None
 
     val self = init match {
-        case TwoPSetSimApp.Init(self) => self
+        case ORSetSimApp.Init(self) => self
     }
 
     private val period: Long = 1000 // TODO
@@ -55,7 +55,7 @@ class TwoPSetSimApp(val init: TwoPSetSimApp.Init) extends ComponentDefinition wi
     timer uponEvent {
         case DresdenTimeout(_) => handle {
             // Either send another 'add' or remove a random
-            if (math.random < 0.3 && twopset.get.entries.nonEmpty) {
+            if (math.random < 0.3 && orset.get.entries.nonEmpty) {
                 removeRandom()
             } else {
                 sendAdd()
@@ -64,16 +64,19 @@ class TwoPSetSimApp(val init: TwoPSetSimApp.Init) extends ComponentDefinition wi
     }
 
     mngr uponEvent {
-        case Response(id, crdt: TwoPSet[String]) => handle {
-            twopset = Some(crdt)
+        case Response(id, crdt: ORSet[String]) => handle {
+            orset = Some(crdt)
             logger.info(s"$self Received $crdt")
             sendAdd()
         }
-        case Update(id, crdt: TwoPSet[String]) => handle {
+        case Update(id, crdt: ORSet[String]) => handle {
             logger.info(s"Received CRDT update for $id")
-            twopset = Some(crdt)
+            orset = Some(crdt)
             import scala.collection.JavaConverters._
-            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.TWOPSET_STR, crdt.entries.asJava)
+            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.entries.asJava)
+        }
+        case anything => handle {
+            logger.warn(s"Received anything! $anything")
         }
     }
 
@@ -89,7 +92,7 @@ class TwoPSetSimApp(val init: TwoPSetSimApp.Init) extends ComponentDefinition wi
     private def removeRandom(): Unit = {
         if (numSends < maxSends) {
             logger.debug(s"$self Triggering remove")
-            val it = random[String](twopset.get.entries)
+            val it = random[String](orset.get.elements())
             trigger(Op(SimUtil.CRDT_SET_KEY, RemoveOperation(it)) -> mngr)
             numSends += 1
         }

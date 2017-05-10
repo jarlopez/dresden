@@ -46,6 +46,10 @@ case class ORSet[T](entries: Set[(T, String)] = Set.empty[(T, String)]) extends 
         }
     }
 
+    def elements(): Set[T] = {
+        entries.map(it => it._1)
+    }
+
     def remove(e: Set[(T, String)]): ORSet[T] = {
         copy(entries = entries  -- e)
     }
@@ -74,13 +78,13 @@ class ORSetManager[V](init: Init[CRDTManager[ORSet[V], Set[V]]]) extends CRDTMan
 
     override def ops: CRDTOpSpec[ORSet[V], Set[V]] = new CRDTOpSpec[ORSet[V], Set[V]] {
         override def query(state: ORSet[V]): Set[V] = {
-            state.entries.map(it => it._1)
+            state.elements()
         }
         
         override def prepare(op: CRDTOperation, state: ORSet[V]): Try[Option[Any]] = op match {
             case AddOperation(it: V) =>
                 val alpha: String = UUID.randomUUID().toString
-                Success(Some(AddOperation(it, alpha)))
+                Success(Some(AddOperation((it, alpha))))
             case RemoveOperation(it: V) =>
                 if (state.query(it)) {
                     state.entries.find(it => it._1.equals(it)) match {
@@ -96,6 +100,14 @@ class ORSetManager[V](init: Init[CRDTManager[ORSet[V], Set[V]]]) extends CRDTMan
         override def create(): ORSet[V] = ORSet.apply[V]()
 
         override def effect(op: CRDTOperation, state: ORSet[V]): ORSet[V] = op match {
+            case AddOperation(pair: (V, String)) =>
+                //XXX Type erasure! What if two clients use same ID but different type?
+                logger.debug(s"adding pair $pair")
+                state.add(pair)
+            case RemoveOperation(els: Set[(V, String)]) =>
+                // Causal-order ensures that add(it) has been delivered
+                logger.debug(s"removing els $els")
+                state.remove(els)
             case _ =>
                 super.effect(op, state)
         }

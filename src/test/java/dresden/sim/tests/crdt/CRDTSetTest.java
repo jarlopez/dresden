@@ -32,6 +32,16 @@ public class CRDTSetTest extends TestBase {
         assertAllSetsSame();
     }
 
+    @Test
+    public void orset() {
+        int numNodes = 2;
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.ORSET, numNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        assertAllSetsSame();
+    }
+
     private void assertAllSetsSame() {
         Set<String> prev = null;
         for (String key : res.keys()) {

@@ -20,6 +20,7 @@ public class ScenarioGen {
     public enum CRDTTestType {
         GSET,
         TWOPSET,
+        ORSET,
     }
 
     // TODO Pull out common ones
@@ -108,6 +109,19 @@ public class ScenarioGen {
             Map<String, Object> nodeConfig = new HashMap<>();
             nodeConfig.put("dresden.dresden.sim.type", "crdt");
             nodeConfig.put("dresden.dresden.sim.crdt.target", "twopset");
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
+        }
+    };
+    static Operation1<StartNodeEvent, Integer> startORSetNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeOp(nodeId) {
+
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("dresden.dresden.sim.type", "crdt");
+            nodeConfig.put("dresden.dresden.sim.crdt.target", "orset");
             nodeConfig.put("system.id", nodeId);
             nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
             nodeConfig.put("system.port", ScenarioSetup.appPort);
@@ -233,6 +247,9 @@ public class ScenarioGen {
                                 break;
                             case TWOPSET:
                                 raise(numNodes, startTwoPSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case ORSET:
+                                raise(numNodes, startORSetNode, new BasicIntSequentialDistribution(1));
                                 break;
                         }
                     }

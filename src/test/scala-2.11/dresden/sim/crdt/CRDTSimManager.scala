@@ -4,8 +4,8 @@ import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BestEffortBroadcast, CausalOrderReliableBroadcast, PerfectLink, ReliableBroadcast}
 import dresden.components.broadcast.{EagerReliableBroadcast, GossippingBasicBroadcast, NoWaitingCRB}
 import dresden.components.links.PerfectP2PLink
-import dresden.crdt.Ports.{GSetManagement, TwoPSetManagement}
-import dresden.crdt.set.{GSet, GSetManager, TwoPSetManager}
+import dresden.crdt.Ports.{GSetManagement, ORSetManagement, TwoPSetManagement}
+import dresden.crdt.set.{GSet, GSetManager, ORSetManager, TwoPSetManager}
 import dresden.sim.crdt.CRDTSimManager.ExtPort
 import dresden.sim.util.NoView
 import se.sics.kompics.network.Network
@@ -73,6 +73,13 @@ class CRDTSimManager(val init: CRDTSimManager.Init) extends ComponentDefinition 
 
             connect[CausalOrderReliableBroadcast](crb -> mngr)
             connect[TwoPSetManagement](mngr -> appComp)
+            connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
+        case "orset" =>
+            val mngr = create(classOf[ORSetManager[String]], new Init[ORSetManager[String]](self))
+            val appComp = create(classOf[ORSetSimApp], ORSetSimApp.Init(self))
+
+            connect[CausalOrderReliableBroadcast](crb -> mngr)
+            connect[ORSetManagement](mngr -> appComp)
             connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
     }
 

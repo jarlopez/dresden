@@ -37,7 +37,7 @@ abstract class CRDTManager[T, V](init: Init[CRDTManager[T, V]]) extends Componen
         case Some(crdt) =>
             ops.prepare(op, crdt) match {
                 case Success(Some(msg: CRDTOperation)) =>
-                    logger.debug(s"$self triggering msg after prepare phase")
+                    logger.debug(s"$self triggering $msg after prepare phase")
                     val wrapper = CRB_Broadcast(Op(id, msg))
                     trigger(wrapper -> crb)
                 case Success(None) =>
@@ -57,7 +57,7 @@ abstract class CRDTManager[T, V](init: Init[CRDTManager[T, V]]) extends Componen
                     trigger(Response(id, res) -> mgmt)
                 }
                 case Op(id, cmd: CRDTOperation) => handle {
-                    logger.debug(s"Handling cmd for $id")
+                    logger.debug(s"Handling $cmd for $id")
                     op(id, cmd)
                 }
             }
