@@ -36,6 +36,12 @@ libraryDependencies ++= Seq(
     "org.scala-lang.modules" %% "scala-pickling" % "0.10.1",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
 
+    // Client
+    "commons-cli" % "commons-cli" % "1.3.1",
+    "org.jline" % "jline" % "3.1.3",
+    "log4j" % "log4j" % "1.2.17",
+
+
     // Testing
     "org.scalactic" %% "scalactic" % "3.0.1",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
