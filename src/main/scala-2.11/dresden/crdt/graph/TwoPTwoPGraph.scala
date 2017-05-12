@@ -2,7 +2,7 @@ package dresden.crdt.graph
 
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.Ports.TwoPTwoPGraphManagement
-import dresden.crdt.graph.TwoPTwoPGraphManager.{AddOperation, RemoveOperation}
+import dresden.crdt.graph.TwoPTwoPGraphManager._
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import se.sics.kompics.sl.Init
 import se.sics.ktoolbox.util.network.KAddress
@@ -57,9 +57,12 @@ object TwoPTwoPGraph {
 object TwoPTwoPGraphManager {
     case class Init(self: KAddress)
 
-    case class AddOperation(e: Any) extends CRDTOperation
-    case class RemoveOperation(e: Any) extends CRDTOperation
-    case class QueryOperation(e: Any) extends CRDTOperation
+    case class AddVertexOperation(e: Any) extends CRDTOperation
+    case class AddEdgeOperation(e: Any) extends CRDTOperation
+    case class RemoveVertexOperation(e: Any) extends CRDTOperation
+    case class RemoveEdgeOperation(e: Any) extends CRDTOperation
+    case class QueryVertexOperation(e: Any) extends CRDTOperation
+    case class QueryEdgeOperation(e: Any) extends CRDTOperation
 }
 
 // TODO Figure out how to represent second type (currently V)
@@ -74,9 +77,13 @@ class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) exte
     override def ops: CRDTOpSpec[TwoPTwoPGraph[V], V] = new CRDTOpSpec[TwoPTwoPGraph[V], V] {
 
         override def prepare(op: CRDTOperation, state: TwoPTwoPGraph[V]): Try[Option[Any]] = op match {
-            case AddOperation(it: V) => Failure(new Throwable("Not implemented"))
-
-            case RemoveOperation(it: V) => Failure(new Throwable("Not implemented"))
+            // TODO Figure out what types we have got here
+            case AddVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
+            case RemoveVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
+            case AddEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
+            case RemoveEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
+            case QueryVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
+            case QueryEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
 
             case _ => super.prepare(op, state)
         }
@@ -84,8 +91,12 @@ class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) exte
         override def create(): TwoPTwoPGraph[V] = TwoPTwoPGraph.apply[V]()
 
         override def effect(op: CRDTOperation, state: TwoPTwoPGraph[V]): TwoPTwoPGraph[V] = op match {
-            case AddOperation(pair: (V, String)) => state           // TODO
-            case RemoveOperation(els: Set[(V, String)]) => state    // TODO
+            case AddVertexOperation(it: V) => state     // TODO
+            case AddEdgeOperation(it: V) => state       // TODO
+            case RemoveVertexOperation(it: V) => state  // TODO
+            case RemoveEdgeOperation(it: V) => state    // TODO
+            case QueryVertexOperation(it: V) => state   // TODO
+            case QueryEdgeOperation(it: V) => state     // TODO
             case _ =>
                 super.effect(op, state)
         }
