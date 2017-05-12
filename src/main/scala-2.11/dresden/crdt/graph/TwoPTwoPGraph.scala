@@ -44,9 +44,20 @@ import scala.util.{Failure, Try}
 case class TwoPTwoPGraph[V](
                                va: Set[V] = Set.empty[V],
                                vr: Set[V] = Set.empty[V],
-                               ea: Set[V] = Set.empty[V],
-                               er: Set[V] = Set.empty[V]) extends OpBasedCRDT {
+                               ea: Set[(V, V)] = Set.empty[(V, V)],
+                               er: Set[(V, V)] = Set.empty[(V, V)]) extends OpBasedCRDT {
 
+    def lookup(v: V): Boolean = (va -- vr).contains(v)
+
+    def lookup(u: V, v: V): Boolean =  lookup(u) && lookup(v) && (ea -- er).contains((u, v))
+
+    def addVertex(w: V): TwoPTwoPGraph[V] = copy(va = va + w)
+
+    def addEdge(u: V, v: V): TwoPTwoPGraph[V] = copy(ea = ea + ((u, v)))
+
+    def removeVertex(w: V): TwoPTwoPGraph[V] = copy(vr = vr + w)
+
+    def removeEdge(u: V, v: V): TwoPTwoPGraph[V] = copy(er = er + ((u, v)))
 }
 
 object TwoPTwoPGraph {
