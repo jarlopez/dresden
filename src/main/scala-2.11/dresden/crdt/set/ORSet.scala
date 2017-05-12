@@ -6,8 +6,6 @@ import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
 import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import dresden.crdt.Ports.ORSetManagement
 import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
-import dresden.networking.MessageCheck
-import se.sics.kompics.KompicsEvent
 import se.sics.kompics.sl.Init
 import se.sics.ktoolbox.util.network.KAddress
 

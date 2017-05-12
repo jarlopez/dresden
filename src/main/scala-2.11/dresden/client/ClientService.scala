@@ -84,7 +84,7 @@ class ClientService extends ComponentDefinition with StrictLogging {
 //        }
     }
 
-    private[kvstore] def op(key: String) = {
+    private def op(key: String) = {
 //        val op = GetOperation(key, UUID.randomUUID().toString, self)
 //        val owf = OpWithFuture(op)
 //        trigger(owf, onSelf)
