@@ -6,7 +6,7 @@ import java.util.UUID
 import com.typesafe.scalalogging.StrictLogging
 import dresden.crdt.Ports._
 import dresden.crdt.graph.TwoPTwoPGraph
-import dresden.crdt.graph.TwoPTwoPGraphManager.{AddEdgeOperation, AddVertexOperation}
+import dresden.crdt.graph.TwoPTwoPGraphManager.{AddEdgeOperation, AddVertexOperation, RemoveVertexOperation}
 import dresden.crdt.set.ORSet
 import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
 import dresden.sim.SimUtil.DresdenTimeout
@@ -57,7 +57,15 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
 
     timer uponEvent {
         case DresdenTimeout(_) => handle {
-            sendAdd()
+            sendAddVertex()
+            val state = graph.get.query()
+            if (math.random < 0.3 && state._1.nonEmpty) {
+                removeRandomVertex()
+            } else if (math.random < 0.3 && state._2.nonEmpty) {
+                removeRandomEdge()
+            } else if (state._1.size >= 2) {
+                sendAddEdge()
+            }
         }
     }
 
@@ -66,14 +74,11 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
         case Response(id, crdt: TwoPTwoPGraph[String]) => handle {
             graph = Some(crdt)
             logger.info(s"$self Received $crdt")
-            sendAdd()
+            sendAddVertex()
         }
         case Update(id, crdt: TwoPTwoPGraph[String]) => handle {
             logger.info(s"Received CRDT update for $id")
             graph = Some(crdt)
-
-            import scala.collection.JavaConverters._
-            // TODO Figure out how to use simm's classloader for this...
 
             val scalaDill = crdt.query()
             // Convert  to java-like
@@ -89,18 +94,41 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
         }
     }
 
-    private def sendAdd(): Unit = {
+    private def sendAddVertex(): Unit = {
         if (numSends < maxSends) {
             logger.debug(s"$self Triggering send")
-
             trigger(Op(SimUtil.CRDT_SET_KEY, AddVertexOperation(self.toString + SimUtil.DELIM_STR + numSends)) -> mngr)
-
             numSends += 1
         }
     }
 
-    private def removeRandom(): Unit = {
+    private def sendAddEdge(): Unit = {
         if (numSends < maxSends) {
+            logger.debug(s"$self Triggering send")
+            val state = graph.get.query()
+            val edge = (random[String](state._1), random[String](state._1))
+            trigger(Op(SimUtil.CRDT_SET_KEY, AddEdgeOperation(edge)) -> mngr)
+            numSends += 1
+        }
+    }
+
+    private def removeRandomVertex(): Unit = {
+        if (numSends < maxSends) {
+            val state = graph.get.query()
+            val it = random[String](state._1)
+            logger.debug(s"$self Triggering remove on vertex $it")
+            trigger(Op(SimUtil.CRDT_SET_KEY, RemoveVertexOperation(it)) -> mngr)
+            numSends += 1
+        }
+    }
+
+    private def removeRandomEdge(): Unit = {
+        if (numSends < maxSends) {
+            val state = graph.get.query()
+            val it = random[(String, String)](state._2)
+            logger.debug(s"$self Triggering remove on edge $it")
+            trigger(Op(SimUtil.CRDT_SET_KEY, RemoveVertexOperation(it)) -> mngr)
+            numSends += 1
         }
     }
 

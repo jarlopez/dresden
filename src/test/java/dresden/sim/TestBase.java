@@ -34,4 +34,10 @@ public class TestBase {
             System.out.println(key + ": " + res.get(key, Set.class));
         }
     }
+
+    public static void dumpRes() {
+        for (String key : res.keys()) {
+            System.out.println(key + ": " + res.get(key, Object.class));
+        }
+    }
 }

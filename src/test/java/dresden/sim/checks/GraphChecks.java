@@ -2,6 +2,7 @@ package dresden.sim.checks;
 
 import dresden.sim.SimUtil;
 import dresden.sim.TestBase;
+import org.apache.log4j.Logger;
 import scala.Tuple2;
 
 import java.io.ByteArrayInputStream;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import static org.junit.Assert.*;
 
 public class GraphChecks extends TestBase {
+    private static Logger log = Logger.getLogger(GraphChecks.class.getName());
 
     public static void checkConsistency(int numNodes) {
         checkConsistency(numNodes, 0);
@@ -30,6 +32,10 @@ public class GraphChecks extends TestBase {
                 ObjectInputStream in = new ObjectInputStream(bis);
                 Tuple2<HashSet<String>, HashSet<Tuple2<String, String>>> state = (Tuple2<HashSet<String>, HashSet<Tuple2<String, String>>>) in.readObject();
                 assertNotNull(state);
+
+                if (log.isDebugEnabled()) {
+                    log.debug(state);
+                }
 
                 if (prevState == null) {
                     prevState = state;
