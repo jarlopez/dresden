@@ -87,6 +87,8 @@ class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) exte
 
     override def ops: CRDTOpSpec[TwoPTwoPGraph[V], V] = new CRDTOpSpec[TwoPTwoPGraph[V], V] {
 
+        override def query(state: TwoPTwoPGraph[V]): ((Set[V], Set[(V, V)])) = (state.va -- state.vr, state.ea -- state.er)
+
         override def prepare(op: CRDTOperation, state: TwoPTwoPGraph[V]): Try[Option[Any]] = op match {
             case RemoveVertexOperation(w: V) =>
                 val check = (state.ea -- state.er).forall(x =>
@@ -123,6 +125,5 @@ class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) exte
                 super.effect(op, state)
         }
 
-        override def query(state: TwoPTwoPGraph[V]): V = ???        // TODO
     }
 }
