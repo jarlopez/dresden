@@ -3,6 +3,7 @@ package dresden.sim.tests.crdt;
 import dresden.sim.ScenarioGen;
 import dresden.sim.ScenarioSetup;
 import dresden.sim.TestBase;
+import dresden.sim.checks.GraphChecks;
 import org.junit.Test;
 import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.run.LauncherComp;
@@ -15,6 +16,6 @@ public class CRDTGraphTest extends TestBase {
         SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.TWOPTWOPGRAPH, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
-        printResAsSet();
+        GraphChecks.checkConsistency(numNodes);
     }
 }

@@ -35,6 +35,7 @@ libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "0.9.28",
     "org.scala-lang.modules" %% "scala-pickling" % "0.10.1",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "io.suzaku" %% "boopickle" % "1.2.6",
 
     // Client
     "commons-cli" % "commons-cli" % "1.3.1",

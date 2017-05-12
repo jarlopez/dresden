@@ -35,6 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Lars Kroll <lkroll@kth.se>
  */
 public class SimulationResultSingleton implements SimulationResultMap {
+    public static ClassLoader rootClassLoader;
+    public static ClassLoader customClassLoader;
 
     public static SimulationResultMap instance = null;
 
@@ -44,7 +46,8 @@ public class SimulationResultSingleton implements SimulationResultMap {
             if (!myClassLoader.toString().startsWith("sun.")) {
                 // Custom class loader
                 try {
-                    ClassLoader rootClassLoader = SimulationResultSingleton.class.getClassLoader().getParent();
+                    customClassLoader = myClassLoader;
+                    rootClassLoader = SimulationResultSingleton.class.getClassLoader().getParent();
                     Class otherClassInstance = rootClassLoader.loadClass(SimulationResultSingleton.class.getName());
                     Method getInstanceMethod = otherClassInstance.getDeclaredMethod("getInstance", new Class[]{});
                     Object otherAbsoluteSingleton = getInstanceMethod.invoke(null, new Object[]{});

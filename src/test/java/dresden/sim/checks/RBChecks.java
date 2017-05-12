@@ -10,9 +10,6 @@ import static org.junit.Assert.assertTrue;
 
 public class RBChecks extends TestBase {
 
-    // TODO Store tuples of (from, msgId) to allow for RB3
-    // TODO Add RB4 Agreement
-
     // If a correct process p broadcasts a message m,
     // then p eventually delivers m
     public static void checkValidity(int numNodes) {

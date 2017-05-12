@@ -1,5 +1,6 @@
 package dresden.sim.crdt
 
+import java.io.{ByteArrayOutputStream, ObjectOutputStream}
 import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
@@ -14,6 +15,7 @@ import se.sics.kompics.Start
 import se.sics.kompics.sl.{ComponentDefinition, handle}
 import se.sics.kompics.timer.{SchedulePeriodicTimeout, Timer}
 import se.sics.ktoolbox.util.network.KAddress
+import boopickle.Default._
 
 object TwoPTwoPGraphSimApp {
 
@@ -59,6 +61,7 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
         }
     }
 
+
     mngr uponEvent {
         case Response(id, crdt: TwoPTwoPGraph[String]) => handle {
             graph = Some(crdt)
@@ -69,7 +72,17 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
             logger.info(s"Received CRDT update for $id")
             graph = Some(crdt)
 
-            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.query())
+            import scala.collection.JavaConverters._
+            // TODO Figure out how to use simm's classloader for this...
+
+            val scalaDill = crdt.query()
+            // Convert  to java-like
+            val dill = (scalaToJavaSetConverter(scalaDill._1), scalaToJavaSetConverter2(scalaDill._2))
+            val bos = new ByteArrayOutputStream()
+            val out = new ObjectOutputStream(bos)
+            out.writeObject(dill)
+
+            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.GSET_STR, bos.toByteArray)
         }
         case anything => handle {
             logger.warn(s"receive anything! $anything")
@@ -95,5 +108,17 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
         val n = util.Random.nextInt(s.size)
         s.iterator.drop(n).next
     }
+
+    def scalaToJavaSetConverter(scalaSet: Set[String]): java.util.Set[String] = {
+        val javaSet = new java.util.HashSet[String]()
+        scalaSet.foreach(entry => javaSet.add(entry))
+        javaSet
+    }
+    def scalaToJavaSetConverter2(scalaSet: Set[(String, String)]): java.util.Set[(String, String)] = {
+        val javaSet = new java.util.HashSet[(String, String)]()
+        scalaSet.foreach(entry => javaSet.add(entry))
+        javaSet
+    }
+
 
 }
