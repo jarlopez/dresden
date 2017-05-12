@@ -27,4 +27,7 @@ object Ports {
     class ORSetManagement extends CRDTManagement {
         request[Get]
     }
+    class TwoPTwoPGraphManagement extends CRDTManagement {
+        request[Get]
+    }
 }
