@@ -5,6 +5,7 @@ import java.util.UUID
 import com.typesafe.scalalogging.StrictLogging
 import dresden.crdt.Ports._
 import dresden.crdt.graph.TwoPTwoPGraph
+import dresden.crdt.graph.TwoPTwoPGraphManager.{AddEdgeOperation, AddVertexOperation}
 import dresden.crdt.set.ORSet
 import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
 import dresden.sim.SimUtil.DresdenTimeout
@@ -54,7 +55,7 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
 
     timer uponEvent {
         case DresdenTimeout(_) => handle {
-            logger.warn("TODO")
+            sendAdd()
         }
     }
 
@@ -68,14 +69,18 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
             logger.info(s"Received CRDT update for $id")
             graph = Some(crdt)
 
-//            import scala.collection.JavaConverters._
-//            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.entries.asJava)
+            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.query())
+        }
+        case anything => handle {
+            logger.warn(s"receive anything! $anything")
         }
     }
 
     private def sendAdd(): Unit = {
         if (numSends < maxSends) {
             logger.debug(s"$self Triggering send")
+
+            trigger(Op(SimUtil.CRDT_SET_KEY, AddVertexOperation(self.toString + SimUtil.DELIM_STR + numSends)) -> mngr)
 
             numSends += 1
         }

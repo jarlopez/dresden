@@ -46,6 +46,7 @@ case class TwoPTwoPGraph[V](
                                vr: Set[V] = Set.empty[V],
                                ea: Set[(V, V)] = Set.empty[(V, V)],
                                er: Set[(V, V)] = Set.empty[(V, V)]) extends OpBasedCRDT {
+    def query(): (Set[V], Set[(V, V)]) =  (va -- vr, ea -- er)
 
     def lookup(v: V): Boolean = (va -- vr).contains(v)
 
@@ -77,17 +78,17 @@ object TwoPTwoPGraphManager {
 }
 
 // TODO Figure out how to represent second type (currently V)
-class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) extends CRDTManager[TwoPTwoPGraph[V], V](init) {
+class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], (Set[V], Set[(V, V)])]]) extends CRDTManager[TwoPTwoPGraph[V], (Set[V], Set[(V, V)])](init) {
     override val mgmt = provides[TwoPTwoPGraphManagement]
 
     // Hack to convert init to CRDTManagers's init
     def this(it: TwoPTwoPGraphManager.Init) = {
-        this(new Init[CRDTManager[TwoPTwoPGraph[V], V]](it.self))
+        this(new Init[CRDTManager[TwoPTwoPGraph[V], (Set[V], Set[(V, V)])]](it.self))
     }
 
-    override def ops: CRDTOpSpec[TwoPTwoPGraph[V], V] = new CRDTOpSpec[TwoPTwoPGraph[V], V] {
+    override def ops: CRDTOpSpec[TwoPTwoPGraph[V], (Set[V], Set[(V, V)])] = new CRDTOpSpec[TwoPTwoPGraph[V], (Set[V], Set[(V, V)])] {
 
-        override def query(state: TwoPTwoPGraph[V]): ((Set[V], Set[(V, V)])) = (state.va -- state.vr, state.ea -- state.er)
+        override def query(state: TwoPTwoPGraph[V]): (Set[V], Set[(V, V)]) = state.query()
 
         override def prepare(op: CRDTOperation, state: TwoPTwoPGraph[V]): Try[Option[Any]] = op match {
             case RemoveVertexOperation(w: V) =>

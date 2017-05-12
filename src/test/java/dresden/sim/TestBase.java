@@ -29,7 +29,7 @@ public class TestBase {
         return false;
     }
 
-    public static void printRes() {
+    public static void printResAsSet() {
         for (String key : res.keys()) {
             System.out.println(key + ": " + res.get(key, Set.class));
         }

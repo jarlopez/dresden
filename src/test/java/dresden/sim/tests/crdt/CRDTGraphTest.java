@@ -14,5 +14,7 @@ public class CRDTGraphTest extends TestBase {
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.TWOPTWOPGRAPH, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
+
+        printResAsSet();
     }
 }

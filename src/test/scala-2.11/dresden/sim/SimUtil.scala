@@ -11,6 +11,8 @@ object SimUtil {
     val GSET_STR: String = "-gset"
     val TWOPSET_STR: String = "-twopset"
     val ORSET_STR: String = "-orset"
+    val TWOPTWOPGRAPH_STR: String = "-orset"
+
     val DELIM_STR: String = "::"
 
     val CRDT_SET_KEY: String = "test"
