@@ -1,15 +1,13 @@
 package dresden.crdt.graph
 
-import java.util.UUID
-
 import dresden.crdt.CRDT.{CRDTOperation, OpBasedCRDT}
-import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import dresden.crdt.Ports.TwoPTwoPGraphManagement
 import dresden.crdt.graph.TwoPTwoPGraphManager.{AddOperation, RemoveOperation}
+import dresden.crdt.{CRDTManager, CRDTOpSpec}
 import se.sics.kompics.sl.Init
 import se.sics.ktoolbox.util.network.KAddress
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 /*
 1       payload set VA, VR, EA, ER

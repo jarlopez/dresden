@@ -21,6 +21,7 @@ public class ScenarioGen {
         GSET,
         TWOPSET,
         ORSET,
+        TWOPTWOPGRAPH,
     }
 
     // TODO Pull out common ones
@@ -128,6 +129,19 @@ public class ScenarioGen {
             return nodeConfig;
         }
     };
+    static Operation1<StartNodeEvent, Integer> startTwoPTwoPGraphNode = (Operation1<StartNodeEvent, Integer>) nodeId -> new StartNodeOp(nodeId) {
+
+        @Override
+        public Map<String, Object> initConfigUpdate() {
+            Map<String, Object> nodeConfig = new HashMap<>();
+            nodeConfig.put("dresden.dresden.sim.type", "crdt");
+            nodeConfig.put("dresden.dresden.sim.crdt.target", "twoptwopgraph");
+            nodeConfig.put("system.id", nodeId);
+            nodeConfig.put("system.seed", ScenarioSetup.getNodeSeed(nodeId));
+            nodeConfig.put("system.port", ScenarioSetup.appPort);
+            return nodeConfig;
+        }
+    };
 
     // Broadcasting
     public static SimulationScenario gossipNoChurn(int numNodes) {
@@ -222,7 +236,7 @@ public class ScenarioGen {
     }
 
     // CRDT
-    public static SimulationScenario crdtSetNoChurn(CRDTTestType type, int numNodes) {
+    public static SimulationScenario crdtNoChurn(CRDTTestType type, int numNodes) {
 
         return new SimulationScenario() {
             {
@@ -250,6 +264,9 @@ public class ScenarioGen {
                                 break;
                             case ORSET:
                                 raise(numNodes, startORSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case TWOPTWOPGRAPH:
+                                raise(numNodes, startTwoPTwoPGraphNode , new BasicIntSequentialDistribution(1));
                                 break;
                         }
                     }

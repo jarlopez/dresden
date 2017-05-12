@@ -4,31 +4,31 @@ import java.util.UUID
 
 import com.typesafe.scalalogging.StrictLogging
 import dresden.crdt.Ports._
-import dresden.crdt.set.{ORSet, TwoPSet}
+import dresden.crdt.graph.TwoPTwoPGraph
+import dresden.crdt.set.ORSet
 import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
 import dresden.sim.SimUtil.DresdenTimeout
 import dresden.sim.{SimUtil, SimulationResultSingleton}
 import se.sics.kompics.Start
-import se.sics.kompics.sl._
+import se.sics.kompics.sl.{ComponentDefinition, handle}
 import se.sics.kompics.timer.{SchedulePeriodicTimeout, Timer}
 import se.sics.ktoolbox.util.network.KAddress
 
+object TwoPTwoPGraphSimApp {
 
-object ORSetSimApp {
-
-    case class Init(selfAdr: KAddress) extends se.sics.kompics.Init[ORSetSimApp]
+    case class Init(selfAdr: KAddress) extends se.sics.kompics.Init[TwoPTwoPGraphSimApp]
 
 }
 
-class ORSetSimApp(val init: ORSetSimApp.Init) extends ComponentDefinition with StrictLogging {
+class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentDefinition with StrictLogging {
 
-    val mngr = requires[ORSetManagement]
+    val mngr = requires[TwoPTwoPGraphManagement]
     val timer = requires[Timer]
 
-    var orset: Option[ORSet[String]] = None
+    var graph: Option[TwoPTwoPGraph[String]] = None
 
     val self = init match {
-        case ORSetSimApp.Init(self) => self
+        case TwoPTwoPGraphSimApp.Init(self) => self
     }
 
     private val period: Long = 1000 // TODO
@@ -54,29 +54,22 @@ class ORSetSimApp(val init: ORSetSimApp.Init) extends ComponentDefinition with S
 
     timer uponEvent {
         case DresdenTimeout(_) => handle {
-            // Either send another 'add' or remove a random
-            if (math.random < 0.3 && orset.get.entries.nonEmpty) {
-                removeRandom()
-            } else {
-                sendAdd()
-            }
+            logger.warn("TODO")
         }
     }
 
     mngr uponEvent {
-        case Response(id, crdt: ORSet[String]) => handle {
-            orset = Some(crdt)
+        case Response(id, crdt: TwoPTwoPGraph[String]) => handle {
+            graph = Some(crdt)
             logger.info(s"$self Received $crdt")
             sendAdd()
         }
-        case Update(id, crdt: ORSet[String]) => handle {
+        case Update(id, crdt: TwoPTwoPGraph[String]) => handle {
             logger.info(s"Received CRDT update for $id")
-            orset = Some(crdt)
-            import scala.collection.JavaConverters._
-            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.entries.asJava)
-        }
-        case anything => handle {
-            logger.warn(s"Received anything! $anything")
+            graph = Some(crdt)
+
+//            import scala.collection.JavaConverters._
+//            SimulationResultSingleton.getInstance().put(self.getId + SimUtil.ORSET_STR, crdt.entries.asJava)
         }
     }
 
@@ -84,17 +77,12 @@ class ORSetSimApp(val init: ORSetSimApp.Init) extends ComponentDefinition with S
         if (numSends < maxSends) {
             logger.debug(s"$self Triggering send")
 
-            trigger(Op(SimUtil.CRDT_SET_KEY, AddOperation(self.toString + SimUtil.DELIM_STR + numSends)) -> mngr)
             numSends += 1
         }
     }
 
     private def removeRandom(): Unit = {
         if (numSends < maxSends) {
-            logger.debug(s"$self Triggering remove")
-            val it = random[String](orset.get.elements())
-            trigger(Op(SimUtil.CRDT_SET_KEY, RemoveOperation(it)) -> mngr)
-            numSends += 1
         }
     }
 
@@ -104,4 +92,3 @@ class ORSetSimApp(val init: ORSetSimApp.Init) extends ComponentDefinition with S
     }
 
 }
-

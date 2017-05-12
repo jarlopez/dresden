@@ -16,7 +16,7 @@ public class CRDTSetTest extends TestBase {
     public void gset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.GSET, numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.GSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         assertAllSetsSame();
@@ -26,7 +26,7 @@ public class CRDTSetTest extends TestBase {
     public void twopset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.TWOPSET, numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.TWOPSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         assertAllSetsSame();
@@ -36,7 +36,7 @@ public class CRDTSetTest extends TestBase {
     public void orset() {
         int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.crdtSetNoChurn(ScenarioGen.CRDTTestType.ORSET, numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.ORSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         assertAllSetsSame();

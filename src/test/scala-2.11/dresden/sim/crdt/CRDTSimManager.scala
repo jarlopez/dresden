@@ -4,7 +4,8 @@ import com.typesafe.scalalogging.StrictLogging
 import dresden.components.Ports.{BestEffortBroadcast, CausalOrderReliableBroadcast, PerfectLink, ReliableBroadcast}
 import dresden.components.broadcast.{EagerReliableBroadcast, GossippingBasicBroadcast, NoWaitingCRB}
 import dresden.components.links.PerfectP2PLink
-import dresden.crdt.Ports.{GSetManagement, ORSetManagement, TwoPSetManagement}
+import dresden.crdt.Ports.{GSetManagement, ORSetManagement, TwoPSetManagement, TwoPTwoPGraphManagement}
+import dresden.crdt.graph.TwoPTwoPGraphManager
 import dresden.crdt.set.{GSet, GSetManager, ORSetManager, TwoPSetManager}
 import dresden.sim.crdt.CRDTSimManager.ExtPort
 import dresden.sim.util.NoView
@@ -45,7 +46,6 @@ class CRDTSimManager(val init: CRDTSimManager.Init) extends ComponentDefinition 
     val crb = create(classOf[NoWaitingCRB], new Init[NoWaitingCRB](self))
 
 
-
     // Perfect point-to-point links
     connect(pp2pl.getNegative(classOf[Network]), extPorts.networkPort, Channel.TWO_WAY)
 
@@ -80,6 +80,13 @@ class CRDTSimManager(val init: CRDTSimManager.Init) extends ComponentDefinition 
 
             connect[CausalOrderReliableBroadcast](crb -> mngr)
             connect[ORSetManagement](mngr -> appComp)
+            connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
+        case "twoptwopgraph" =>
+            val mngr = create(classOf[TwoPTwoPGraphManager[String]], new Init[TwoPTwoPGraphManager[String]](self))
+            val appComp = create(classOf[TwoPTwoPGraphSimApp], TwoPTwoPGraphSimApp.Init(self))
+
+            connect[CausalOrderReliableBroadcast](crb -> mngr)
+            connect[TwoPTwoPGraphManagement](mngr -> appComp)
             connect(appComp.getNegative(classOf[Timer]), extPorts.timerPort, Channel.TWO_WAY)
     }
 
