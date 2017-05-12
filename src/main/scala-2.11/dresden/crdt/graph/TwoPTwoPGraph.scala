@@ -29,7 +29,7 @@ import scala.util.{Failure, Try}
 17      update removeVertex (vertex w)
 18          atSource (w)
 19              pre lookup(w) ⊲ 2P-Set precondition
-20              pre ∀(u, v) ∈ (EA \ ER) : u 6= w ∧ v 6= w   ⊲ Graph precondition: E ⊆ V × V
+20              pre ∀(u, v) ∈ (EA \ ER) : u != w ∧ v != w   ⊲ Graph precondition: E ⊆ V × V
 21          downstream (w)
 22              pre addVertex(w) delivered                  ⊲ 2P-Set precondition
 23              VR := VR ∪ {w}
@@ -49,15 +49,15 @@ case class TwoPTwoPGraph[V](
 
     def lookup(v: V): Boolean = (va -- vr).contains(v)
 
-    def lookup(u: V, v: V): Boolean =  lookup(u) && lookup(v) && (ea -- er).contains((u, v))
+    def lookup(edge: (V, V)): Boolean =  lookup(edge._1) && lookup(edge._2) && (ea -- er).contains(edge)
 
     def addVertex(w: V): TwoPTwoPGraph[V] = copy(va = va + w)
 
-    def addEdge(u: V, v: V): TwoPTwoPGraph[V] = copy(ea = ea + ((u, v)))
+    def addEdge(edge: (V, V)): TwoPTwoPGraph[V] = copy(ea = ea + edge)
 
     def removeVertex(w: V): TwoPTwoPGraph[V] = copy(vr = vr + w)
 
-    def removeEdge(u: V, v: V): TwoPTwoPGraph[V] = copy(er = er + ((u, v)))
+    def removeEdge(edge: (V, V)): TwoPTwoPGraph[V] = copy(er = er + edge)
 }
 
 object TwoPTwoPGraph {
@@ -88,26 +88,37 @@ class TwoPTwoPGraphManager[V](init: Init[CRDTManager[TwoPTwoPGraph[V], V]]) exte
     override def ops: CRDTOpSpec[TwoPTwoPGraph[V], V] = new CRDTOpSpec[TwoPTwoPGraph[V], V] {
 
         override def prepare(op: CRDTOperation, state: TwoPTwoPGraph[V]): Try[Option[Any]] = op match {
-            // TODO Figure out what types we have got here
-            case AddVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
-            case RemoveVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
-            case AddEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
-            case RemoveEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
-            case QueryVertexOperation(it: V) => Failure(new Throwable("Not implemented"))
-            case QueryEdgeOperation(it: V) => Failure(new Throwable("Not implemented"))
-
+            case RemoveVertexOperation(w: V) =>
+                val check = (state.ea -- state.er).forall(x =>
+                    !x._1.equals(w) && !x._2.equals(w)
+                )
+                if (state.lookup(w) && check) {
+                    super.prepare(op, state)
+                } else {
+                    Failure(new Throwable("Failed precondition"))
+                }
+            case AddEdgeOperation(it: (V, V)) =>
+                if (state.lookup(it._1) && state.lookup(it._2)) {
+                    super.prepare(op, state)
+                } else {
+                    Failure(new Throwable("Failed precondition"))
+                }
+            case RemoveEdgeOperation(it: (V, V)) =>
+                if (state.lookup(it)) {
+                    super.prepare(op, state)
+                } else {
+                    Failure(new Throwable("Failed precondition"))
+                }
             case _ => super.prepare(op, state)
         }
 
         override def create(): TwoPTwoPGraph[V] = TwoPTwoPGraph.apply[V]()
 
         override def effect(op: CRDTOperation, state: TwoPTwoPGraph[V]): TwoPTwoPGraph[V] = op match {
-            case AddVertexOperation(it: V) => state     // TODO
-            case AddEdgeOperation(it: V) => state       // TODO
-            case RemoveVertexOperation(it: V) => state  // TODO
-            case RemoveEdgeOperation(it: V) => state    // TODO
-            case QueryVertexOperation(it: V) => state   // TODO
-            case QueryEdgeOperation(it: V) => state     // TODO
+            case AddVertexOperation(it: V) => state.addVertex(it)
+            case AddEdgeOperation(it: (V, V)) => state.addEdge(it)
+            case RemoveVertexOperation(it: V) => state.removeVertex(it)
+            case RemoveEdgeOperation(it: (V, V)) => state.removeEdge(it)
             case _ =>
                 super.effect(op, state)
         }
