@@ -9,8 +9,8 @@ import java.util.Set;
 import static org.junit.Assert.assertTrue;
 
 public class TestBase {
-    protected int numNodes = 10;
-    protected int numChurnNodes = 4;
+    protected int numNodes = 6;
+    protected int numChurnNodes = 3;
 
     protected static final SimulationResultMap res = SimulationResultSingleton.getInstance();
 

@@ -313,4 +313,55 @@ public class ScenarioGen {
             }
         };
     }
+    public static SimulationScenario crdtWithChurn(CRDTTestType type, int numNodes, int numChurnNodes) {
+
+        return new SimulationScenario() {
+            {
+                StochasticProcess systemSetup = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, systemSetupOp);
+                    }
+                };
+                StochasticProcess startBootstrapServer = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, startBootstrapServerOp);
+                    }
+                };
+                StochasticProcess startPeers = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        switch (type) {
+                            case GSET:
+                                raise(numNodes, startGSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case TWOPSET:
+                                raise(numNodes, startTwoPSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case ORSET:
+                                raise(numNodes, startORSetNode, new BasicIntSequentialDistribution(1));
+                                break;
+                            case TWOPTWOPGRAPH:
+                                raise(numNodes, startTwoPTwoPGraphNode , new BasicIntSequentialDistribution(1));
+                                break;
+                        }
+                    }
+                };
+
+                SimulationScenario.StochasticProcess killNodes = new SimulationScenario.StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(0));
+                        raise(numChurnNodes, killNodeOp, new BasicIntSequentialDistribution(numNodes - numChurnNodes + 1));
+                    }
+                };
+
+                systemSetup.start();
+                startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
+                startPeers.startAfterTerminationOf(1000, startBootstrapServer);
+                killNodes.startAfterTerminationOf(1000, startPeers); // Must be within startPeers runtime
+                terminateAfterTerminationOf(50000, killNodes); // Needs to be long enough to guarantee eventual consistency
+            }
+        };
+    }
 }

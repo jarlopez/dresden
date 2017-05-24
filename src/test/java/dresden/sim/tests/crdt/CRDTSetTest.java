@@ -14,9 +14,16 @@ import static org.junit.Assert.assertTrue;
 public class CRDTSetTest extends TestBase {
     @Test
     public void gset() {
-        int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.GSET, numNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        assertAllSetsSame();
+    }
+    @Test
+    public void gsetWithChurn() {
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtWithChurn(ScenarioGen.CRDTTestType.GSET, numNodes, numChurnNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         assertAllSetsSame();
@@ -24,7 +31,6 @@ public class CRDTSetTest extends TestBase {
 
     @Test
     public void twopset() {
-        int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.TWOPSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
@@ -33,14 +39,32 @@ public class CRDTSetTest extends TestBase {
     }
 
     @Test
+    public void twopsetWithChurn() {
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtWithChurn(ScenarioGen.CRDTTestType.TWOPSET, numNodes, numChurnNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        assertAllSetsSame();
+    }
+
+    @Test
     public void orset() {
-        int numNodes = 2;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.crdtNoChurn(ScenarioGen.CRDTTestType.ORSET, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         assertAllSetsSame();
     }
+
+    @Test
+    public void orsetWithChurn() {
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.crdtWithChurn(ScenarioGen.CRDTTestType.ORSET, numNodes, numChurnNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        assertAllSetsSame();
+    }
+
 
     private void assertAllSetsSame() {
         Set<String> prev = null;
