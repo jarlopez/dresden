@@ -75,16 +75,19 @@ public class BEBChecks {
         for (int i = 1; i < numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);
-            assertNotNull(delivers);
-
-            for (String deliverStr : delivers) {
-                String[] parts = SimUtil.getPeerAndId(deliverStr);
-                String host = parts[0];
-                String peerId = getPeerNum(host);
-                String sendQuery = peerId + SimUtil.SEND_STR();
-                List<String> sends = res.get(sendQuery, List.class);
-                assertNotNull(delivers);
-                assertTrue("Message " + deliverStr + " was broadcast by process s(" + sendQuery + ")", sends.contains(deliverStr));
+            boolean receiverIncorrect = SimUtil.isChurnNode(i, numNodes, numChurnNodes);
+            if (delivers == null) {
+                assertTrue(receiverIncorrect);
+            } else {
+                for (String deliverStr : delivers) {
+                    String[] parts = SimUtil.getPeerAndId(deliverStr);
+                    String host = parts[0];
+                    String peerId = getPeerNum(host);
+                    String sendQuery = peerId + SimUtil.SEND_STR();
+                    List<String> sends = res.get(sendQuery, List.class);
+                    assertNotNull(delivers);
+                    assertTrue("Message " + deliverStr + " was broadcast by process s(" + sendQuery + ")", sends.contains(deliverStr));
+                }
             }
         }
     }
