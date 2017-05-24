@@ -7,15 +7,12 @@ import com.typesafe.scalalogging.StrictLogging
 import dresden.crdt.Ports._
 import dresden.crdt.graph.TwoPTwoPGraph
 import dresden.crdt.graph.TwoPTwoPGraphManager.{AddEdgeOperation, AddVertexOperation, RemoveVertexOperation}
-import dresden.crdt.set.ORSet
-import dresden.crdt.set.ORSetManager.{AddOperation, RemoveOperation}
 import dresden.sim.SimUtil.DresdenTimeout
 import dresden.sim.{SimUtil, SimulationResultSingleton}
 import se.sics.kompics.Start
 import se.sics.kompics.sl.{ComponentDefinition, handle}
 import se.sics.kompics.timer.{SchedulePeriodicTimeout, Timer}
 import se.sics.ktoolbox.util.network.KAddress
-import boopickle.Default._
 
 object TwoPTwoPGraphSimApp {
 
@@ -81,7 +78,7 @@ class TwoPTwoPGraphSimApp(val init: TwoPTwoPGraphSimApp.Init) extends ComponentD
             graph = Some(crdt)
 
             val scalaDill = crdt.query()
-            // Convert  to java-like
+            // Force Java serialization :-p
             val dill = (scalaToJavaSetConverter(scalaDill._1), scalaToJavaSetConverter2(scalaDill._2))
             val bos = new ByteArrayOutputStream()
             val out = new ObjectOutputStream(bos)

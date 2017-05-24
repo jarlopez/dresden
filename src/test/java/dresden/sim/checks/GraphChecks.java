@@ -23,12 +23,12 @@ public class GraphChecks extends TestBase {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.GSET_STR();
 
-//            val obj = Unpickle[Seq[String]].fromBytes(res.get(query, ByteBuffer.class))
 
             byte[] pickle = res.get(query, byte[].class);
 
             ByteArrayInputStream bis = new ByteArrayInputStream(pickle);
             try {
+                // Deserialize simulation data
                 ObjectInputStream in = new ObjectInputStream(bis);
                 Tuple2<HashSet<String>, HashSet<Tuple2<String, String>>> state = (Tuple2<HashSet<String>, HashSet<Tuple2<String, String>>>) in.readObject();
                 assertNotNull(state);

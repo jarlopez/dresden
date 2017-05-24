@@ -15,7 +15,7 @@ public class CRBTest extends TestBase {
     public void noChurn() {
         int numNodes = 10;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.crbNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.CRB, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         CRBChecks.checkValidity(numNodes);

@@ -23,6 +23,11 @@ public class ScenarioGen {
         ORSET,
         TWOPTWOPGRAPH,
     }
+    public enum BroadcastTestType {
+        GOSSIP,
+        RB,
+        CRB,
+    }
 
     // TODO Pull out common ones
     static Operation<SetupEvent> systemSetupOp = (Operation<SetupEvent>) () -> new SetupEvent() {
@@ -143,8 +148,8 @@ public class ScenarioGen {
         }
     };
 
-    // Broadcasting
-    public static SimulationScenario gossipNoChurn(int numNodes) {
+
+    public static SimulationScenario broadcastNoChurn(BroadcastTestType type, int numNodes) {
 
         return new SimulationScenario() {
             {
@@ -162,8 +167,22 @@ public class ScenarioGen {
                 };
                 StochasticProcess startPeers = new StochasticProcess() {
                     {
+                        Operation1<StartNodeEvent, Integer> op;
+                        switch (type) {
+                            case GOSSIP:
+                                op = startGossipNode;
+                                break;
+                            case RB:
+                                op = startRBNode;
+                                break;
+                            case CRB:
+                                op = startCRBNode;
+                                break;
+                            default:
+                                op = startGossipNode;
+                        }
                         eventInterArrivalTime(uniform(1000, 1100));
-                        raise(numNodes, startGossipNode, new BasicIntSequentialDistribution(1));
+                        raise(numNodes, op, new BasicIntSequentialDistribution(1));
                     }
                 };
 
@@ -174,66 +193,7 @@ public class ScenarioGen {
             }
         };
     }
-    public static SimulationScenario rbNoChurn(int numNodes) {
 
-        return new SimulationScenario() {
-            {
-                StochasticProcess systemSetup = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, systemSetupOp);
-                    }
-                };
-                StochasticProcess startBootstrapServer = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, startBootstrapServerOp);
-                    }
-                };
-                StochasticProcess startPeers = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(uniform(1000, 1100));
-                        raise(numNodes, startRBNode, new BasicIntSequentialDistribution(1));
-                    }
-                };
-
-                systemSetup.start();
-                startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
-                startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(10000, startPeers);
-            }
-        };
-    }
-    public static SimulationScenario crbNoChurn(int numNodes) {
-
-        return new SimulationScenario() {
-            {
-                StochasticProcess systemSetup = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, systemSetupOp);
-                    }
-                };
-                StochasticProcess startBootstrapServer = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(constant(1000));
-                        raise(1, startBootstrapServerOp);
-                    }
-                };
-                StochasticProcess startPeers = new StochasticProcess() {
-                    {
-                        eventInterArrivalTime(uniform(1000, 1100));
-                        raise(numNodes, startCRBNode, new BasicIntSequentialDistribution(1));
-                    }
-                };
-
-                systemSetup.start();
-                startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
-                startPeers.startAfterTerminationOf(1000, startBootstrapServer);
-                terminateAfterTerminationOf(10000, startPeers);
-            }
-        };
-    }
 
     // CRDT
     public static SimulationScenario crdtNoChurn(CRDTTestType type, int numNodes) {

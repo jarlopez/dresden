@@ -17,7 +17,7 @@ public class GossipTest extends TestBase {
     public void noChurn() {
         int numNodes = 3;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.gossipNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.GOSSIP, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         for (String key : res.keys()) {

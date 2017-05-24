@@ -15,7 +15,7 @@ public class RBTest extends TestBase {
     public void noChurn() {
         int numNodes = 3;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
-        SimulationScenario simpleBootScenario = ScenarioGen.rbNoChurn(numNodes);
+        SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.RB, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
         RBChecks.checkValidity(numNodes);
