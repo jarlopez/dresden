@@ -18,10 +18,6 @@ public class GossipTest extends TestBase {
         SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.GOSSIP, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
 
-        for (String key : res.keys()) {
-            System.out.println(key + ": " + res.get(key, Set.class));
-        }
-
         BEBChecks.checkValidity(numNodes);
         BEBChecks.checkNoDuplication(numNodes);
         BEBChecks.checkNoCreation(numNodes);
@@ -33,10 +29,6 @@ public class GossipTest extends TestBase {
         SimulationScenario simpleBootScenario = ScenarioGen
                 .broadcastWithChurn(ScenarioGen.BroadcastTestType.GOSSIP, numNodes, numChurnNodes);
         simpleBootScenario.simulate(LauncherComp.class);
-
-        for (String key : res.keys()) {
-            System.out.println(key + ": " + res.get(key, Set.class));
-        }
 
         BEBChecks.checkValidity(numNodes, numChurnNodes);
         BEBChecks.checkNoDuplication(numNodes, numChurnNodes);
