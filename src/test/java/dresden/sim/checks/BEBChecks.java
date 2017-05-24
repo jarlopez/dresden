@@ -26,6 +26,7 @@ public class BEBChecks {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.SEND_STR();
             List<String> sends = res.get(query, List.class);
+            boolean senderCorrect = SimUtil.isCorrectNode(i, numNodes, numChurnNodes);
             assertNotNull(sends);
             assertTrue("Only one message sent", sends.size() == 1);
             for (String it : sends) {
@@ -39,7 +40,6 @@ public class BEBChecks {
                     query = j + SimUtil.RECV_STR();
                     List<String> recvs = res.get(query, List.class);
                     String sendStr = SimUtil.genPeerToIdStr(host, id);
-                    boolean senderCorrect = SimUtil.isCorrectNode(i, numNodes, numChurnNodes);
                     boolean receiverCorrect = SimUtil.isCorrectNode(j, numNodes, numChurnNodes);
 
                     if (senderCorrect && receiverCorrect) {
@@ -59,9 +59,9 @@ public class BEBChecks {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);
-            boolean receiverInorrect = SimUtil.isChurnNode(i, numNodes, numChurnNodes);
+            boolean receiverIncorrect = SimUtil.isChurnNode(i, numNodes, numChurnNodes);
             if (delivers == null) {
-                assertTrue(receiverInorrect);
+                assertTrue(receiverIncorrect);
             } else {
                 assertTrue("No duplicate messages were delivered", new HashSet<>(delivers).size() == delivers.size());
             }

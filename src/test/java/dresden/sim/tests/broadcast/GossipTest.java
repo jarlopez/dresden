@@ -11,8 +11,6 @@ import se.sics.kompics.simulator.run.LauncherComp;
 import java.util.Set;
 
 public class GossipTest extends TestBase {
-    private int numNodes = 3;
-    private int numChurnNodes = 1;
 
     @Test
     public void noChurn() {

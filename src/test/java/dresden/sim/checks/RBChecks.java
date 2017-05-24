@@ -15,7 +15,7 @@ public class RBChecks extends TestBase {
     public static void checkValidity(int numNodes) {
         checkValidity(numNodes, 0);
     }
-    static void checkValidity(int numNodes, int numChurnNodes) {
+    public static void checkValidity(int numNodes, int numChurnNodes) {
         // TODO Handle correctness of node
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.SEND_STR();
@@ -25,8 +25,11 @@ public class RBChecks extends TestBase {
             for (String id : sends) {
                 query = i + SimUtil.RECV_STR();
                 List<String> recvs = res.get(query, List.class);
-                assertNotNull(recvs);
-                assertTrue("Message is delivered at p", recvs.contains(id));
+                boolean receiverCorrect = SimUtil.isCorrectNode(i, numNodes, numChurnNodes);
+                if (receiverCorrect) {
+                    assertNotNull(recvs);
+                    assertTrue("Message is delivered at p", recvs.contains(id));
+                }
             }
         }
     }
@@ -36,7 +39,7 @@ public class RBChecks extends TestBase {
     public static void checkNoDuplication(int numNodes) {
         checkNoDuplication(numNodes, 0);
     }
-    static void checkNoDuplication(int numNodes, int numChurnNodes) {
+    public static void checkNoDuplication(int numNodes, int numChurnNodes) {
         BEBChecks.checkNoDuplication(numNodes, numChurnNodes);
     }
 
@@ -45,7 +48,7 @@ public class RBChecks extends TestBase {
     public static void checkNoCreation(int numNodes) {
         checkNoCreation(numNodes, 0);
     }
-    static void checkNoCreation(int numNodes, int numChurnNodes) {
+    public static void checkNoCreation(int numNodes, int numChurnNodes) {
         BEBChecks.checkNoCreation(numNodes, numChurnNodes);
     }
 
@@ -54,25 +57,26 @@ public class RBChecks extends TestBase {
     public static void checkAgreement(int numNodes) {
         checkAgreement(numNodes, 0);
     }
-    static void checkAgreement(int numNodes, int numChurnNodes) {
-        //  TODO Handle correctness of nodes
+    public static void checkAgreement(int numNodes, int numChurnNodes) {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);
-            assertNotNull(delivers);
 
-            for (String id : delivers) {
-                //  TODO Handle correctness of nodes
-                for (int j = 1; j <= numNodes; j++) {
-                    query = j + SimUtil.RECV_STR();
-                    List<String> recvs = res.get(query, List.class);
-
-                    assertNotNull(recvs);
-                    assertTrue("Message is delivered at correct nodes", recvs.contains(id));
-
+            boolean senderCorrect = SimUtil.isCorrectNode(i, numNodes, numChurnNodes);
+            if (senderCorrect) {
+                assertNotNull(delivers);
+                for (String id : delivers) {
+                    for (int j = 1; j <= numNodes; j++) {
+                        query = j + SimUtil.RECV_STR();
+                        List<String> recvs = res.get(query, List.class);
+                        boolean receiverCorrect = SimUtil.isCorrectNode(j, numNodes, numChurnNodes);
+                        if (receiverCorrect) {
+                            assertNotNull(recvs);
+                            assertTrue("Message is delivered at correct nodes", recvs.contains(id));
+                        }
+                    }
                 }
             }
-
         }
     }
 }
