@@ -21,8 +21,6 @@ public class BEBChecks {
         checkValidity(numNodes, 0);
     }
     public static void checkValidity(int numNodes, int numChurnNodes) {
-        // TODO Move format generation/parsing into helper obj for cinsistency
-        //  TODO Handle correctness of nodes
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.SEND_STR();
             List<String> sends = res.get(query, List.class);

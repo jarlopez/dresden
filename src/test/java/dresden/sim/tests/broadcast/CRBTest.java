@@ -13,7 +13,6 @@ public class CRBTest extends TestBase {
 
     @Test
     public void noChurn() {
-        int numNodes = 10;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.CRB, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
@@ -23,5 +22,19 @@ public class CRBTest extends TestBase {
         CRBChecks.checkNoCreation(numNodes);
         CRBChecks.checkAgreement(numNodes);
         CRBChecks.checkCausalDelivery(numNodes);
+    }
+
+    @Test
+    public void withChurn() {
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen.broadcastWithChurn(
+                ScenarioGen.BroadcastTestType.CRB, numNodes, numChurnNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        CRBChecks.checkValidity(numNodes, numChurnNodes);
+        CRBChecks.checkNoDuplication(numNodes, numChurnNodes);
+        CRBChecks.checkNoCreation(numNodes, numChurnNodes);
+        CRBChecks.checkAgreement(numNodes, numChurnNodes);
+        CRBChecks.checkCausalDelivery(numNodes, numChurnNodes);
     }
 }
