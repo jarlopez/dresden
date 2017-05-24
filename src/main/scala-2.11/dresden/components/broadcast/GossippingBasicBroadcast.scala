@@ -29,7 +29,7 @@ class GossippingBasicBroadcast(init: Init[GossippingBasicBroadcast]) extends Com
 
     ctrl uponEvent {
         case _: Start => handle {
-            logger.info("Starting!")
+            logger.debug("Starting!")
         }
     }
 

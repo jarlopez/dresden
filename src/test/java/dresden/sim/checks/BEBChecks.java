@@ -20,7 +20,7 @@ public class BEBChecks {
     public static void checkValidity(int numNodes) {
         checkValidity(numNodes, 0);
     }
-    protected static void checkValidity(int numNodes, int numChurnNodes) {
+    public static void checkValidity(int numNodes, int numChurnNodes) {
         // TODO Move format generation/parsing into helper obj for cinsistency
         //  TODO Handle correctness of nodes
         for (int i = 1; i <= numNodes; i++) {
@@ -39,8 +39,13 @@ public class BEBChecks {
                     query = j + SimUtil.RECV_STR();
                     List<String> recvs = res.get(query, List.class);
                     String sendStr = SimUtil.genPeerToIdStr(host, id);
-                    assertNotNull(recvs);
-                    assertTrue("Message is received at all other nodes", recvs.contains(sendStr));
+                    boolean senderCorrect = SimUtil.isCorrectNode(i, numNodes, numChurnNodes);
+                    boolean receiverCorrect = SimUtil.isCorrectNode(j, numNodes, numChurnNodes);
+
+                    if (senderCorrect && receiverCorrect) {
+                        assertNotNull(recvs);
+                        assertTrue("Message is received at all other nodes", recvs.contains(sendStr));
+                    }
                 }
             }
         }
@@ -50,13 +55,16 @@ public class BEBChecks {
         checkNoDuplication(numNodes, 0);
     }
 
-    protected static void checkNoDuplication(int numNodes, int numChurnNodes) {
+    public static void checkNoDuplication(int numNodes, int numChurnNodes) {
         for (int i = 1; i <= numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);
-            assertNotNull(delivers);
-
-            assertTrue("No duplicate messages were delivered", new HashSet<>(delivers).size() == delivers.size());
+            boolean receiverInorrect = SimUtil.isChurnNode(i, numNodes, numChurnNodes);
+            if (delivers == null) {
+                assertTrue(receiverInorrect);
+            } else {
+                assertTrue("No duplicate messages were delivered", new HashSet<>(delivers).size() == delivers.size());
+            }
         }
     }
 
@@ -65,7 +73,7 @@ public class BEBChecks {
     public static void checkNoCreation(int numNodes) {
         checkNoCreation(numNodes, 0);
     }
-    protected static void checkNoCreation(int numNodes, int numChurnNodes) {
+    public static void checkNoCreation(int numNodes, int numChurnNodes) {
         for (int i = 1; i < numNodes; i++) {
             String query = i + SimUtil.RECV_STR();
             List<String> delivers = res.get(query, List.class);

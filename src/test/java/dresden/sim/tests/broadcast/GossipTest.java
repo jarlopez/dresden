@@ -11,11 +11,11 @@ import se.sics.kompics.simulator.run.LauncherComp;
 import java.util.Set;
 
 public class GossipTest extends TestBase {
-    // TODO Keep track of which nodes are correct in churny tests
+    private int numNodes = 3;
+    private int numChurnNodes = 1;
 
     @Test
     public void noChurn() {
-        int numNodes = 3;
         SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
         SimulationScenario simpleBootScenario = ScenarioGen.broadcastNoChurn(ScenarioGen.BroadcastTestType.GOSSIP, numNodes);
         simpleBootScenario.simulate(LauncherComp.class);
@@ -27,5 +27,21 @@ public class GossipTest extends TestBase {
         BEBChecks.checkValidity(numNodes);
         BEBChecks.checkNoDuplication(numNodes);
         BEBChecks.checkNoCreation(numNodes);
+    }
+
+    @Test
+    public void withChurn() {
+        SimulationScenario.setSeed(ScenarioSetup.scenarioSeed);
+        SimulationScenario simpleBootScenario = ScenarioGen
+                .broadcastWithChurn(ScenarioGen.BroadcastTestType.GOSSIP, numNodes, numChurnNodes);
+        simpleBootScenario.simulate(LauncherComp.class);
+
+        for (String key : res.keys()) {
+            System.out.println(key + ": " + res.get(key, Set.class));
+        }
+
+        BEBChecks.checkValidity(numNodes, numChurnNodes);
+        BEBChecks.checkNoDuplication(numNodes, numChurnNodes);
+        BEBChecks.checkNoCreation(numNodes, numChurnNodes);
     }
 }

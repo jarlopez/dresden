@@ -38,4 +38,7 @@ object SimUtil {
 
     def concat(args: String*): String = args.mkString(DELIM_STR)
     def split(it: String): Array[String] = it.split(DELIM_STR)
+
+    def isCorrectNode(id: Integer, numNodes: Integer, numChurnNodes: Integer): Boolean = !isChurnNode(id, numNodes, numChurnNodes)
+    def isChurnNode(id: Integer, numNodes: Integer, numChurnNodes: Integer): Boolean = id >= (numNodes - numChurnNodes + 1)
 }

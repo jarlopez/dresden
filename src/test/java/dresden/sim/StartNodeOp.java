@@ -4,6 +4,8 @@ import se.sics.kompics.network.Address;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.ktoolbox.util.network.KAddress;
 
+import static dresden.sim.ScenarioSetup.HOST_BASE;
+
 public abstract class StartNodeOp extends StartNodeEvent {
     private Integer nodeId;
     KAddress selfAdr;
@@ -11,7 +13,7 @@ public abstract class StartNodeOp extends StartNodeEvent {
     public StartNodeOp(Integer it) {
         this.nodeId = it;
 
-        String nodeIp = "193.0.0." + nodeId;
+        String nodeIp = HOST_BASE + nodeId;
         this.selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
     }
 

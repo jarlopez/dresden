@@ -13,7 +13,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class ScenarioSetup {
-
+    public static final String HOST_BASE = "193.0.0.";
     public static final long scenarioSeed = 1234;
     public static final int appPort = 12345;
     public static final KAddress bootstrapServer;

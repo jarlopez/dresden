@@ -13,8 +13,8 @@
     <!--<logger name="se.sics.ktoolbox.util.network.ports.One2NChannel" level="WARN"/>-->
     <!--<logger name="se.sics" level="TRACE"/>-->
 
-    <!--<logger name="dresden" level="debug"/>-->
-    <logger name="se.sics.ktoolbox.croupier " level="ERROR"/>
+    <logger name="dresden" level="debug"/>
+    <logger name="se.sics.ktoolbox.croupier " level="debug"/>
 
     <root level="WARN">
         <appender-ref ref="CONSOLE"/>

@@ -7,6 +7,7 @@ import se.sics.kompics.simulator.SimulationScenario;
 import se.sics.kompics.simulator.adaptor.Operation;
 import se.sics.kompics.simulator.adaptor.Operation1;
 import se.sics.kompics.simulator.adaptor.distributions.extra.BasicIntSequentialDistribution;
+import se.sics.kompics.simulator.events.system.KillNodeEvent;
 import se.sics.kompics.simulator.events.system.SetupEvent;
 import se.sics.kompics.simulator.events.system.StartNodeEvent;
 import se.sics.kompics.simulator.network.identifier.IdentifierExtractor;
@@ -29,7 +30,6 @@ public class ScenarioGen {
         CRB,
     }
 
-    // TODO Pull out common ones
     static Operation<SetupEvent> systemSetupOp = (Operation<SetupEvent>) () -> new SetupEvent() {
         @Override
         public IdentifierExtractor getIdentifierExtractor() {
@@ -148,6 +148,30 @@ public class ScenarioGen {
         }
     };
 
+    static Operation1 killNodeOp = new Operation1<KillNodeEvent, Integer>() {
+        @Override
+        public KillNodeEvent generate(final Integer nodeId) {
+            return new KillNodeEvent() {
+                KAddress selfAdr;
+
+                {
+                    String nodeIp = ScenarioSetup.HOST_BASE + nodeId;
+                    selfAdr = ScenarioSetup.getNodeAdr(nodeIp, nodeId);
+                    System.out.println("XXXX Killing " + selfAdr);
+                }
+
+                @Override
+                public Address getNodeAddress() {
+                    return selfAdr;
+                }
+
+                @Override
+                public String toString() {
+                    return "KillNode<" + selfAdr.toString() + ">";
+                }
+            };
+        }
+    };
 
     public static SimulationScenario broadcastNoChurn(BroadcastTestType type, int numNodes) {
 
@@ -190,6 +214,56 @@ public class ScenarioGen {
                 startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
                 startPeers.startAfterTerminationOf(1000, startBootstrapServer);
                 terminateAfterTerminationOf(10000, startPeers);
+            }
+        };
+    }
+    public static SimulationScenario broadcastWithChurn(BroadcastTestType type, int numNodes, int numChurnNodes) {
+
+        return new SimulationScenario() {
+            {
+                StochasticProcess systemSetup = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, systemSetupOp);
+                    }
+                };
+                StochasticProcess startBootstrapServer = new StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(1000));
+                        raise(1, startBootstrapServerOp);
+                    }
+                };
+                StochasticProcess startPeers = new StochasticProcess() {
+                    {
+                        Operation1<StartNodeEvent, Integer> op;
+                        switch (type) {
+                            case GOSSIP:
+                                op = startGossipNode;
+                                break;
+                            case RB:
+                                op = startRBNode;
+                                break;
+                            case CRB:
+                                op = startCRBNode;
+                                break;
+                            default:
+                                op = startGossipNode;
+                        }
+                        eventInterArrivalTime(uniform(1000, 1100));
+                        raise(numNodes, op, new BasicIntSequentialDistribution(1));
+                    }
+                };
+                SimulationScenario.StochasticProcess killNodes = new SimulationScenario.StochasticProcess() {
+                    {
+                        eventInterArrivalTime(constant(0));
+                        raise(numChurnNodes, killNodeOp, new BasicIntSequentialDistribution(numNodes - numChurnNodes + 1));
+                    }
+                };
+                systemSetup.start();
+                startBootstrapServer.startAfterTerminationOf(1000, systemSetup);
+                startPeers.startAfterTerminationOf(1000, startBootstrapServer);
+                killNodes.startAfterTerminationOf(1000, startPeers); // Must be within startPeers runtime
+                terminateAfterTerminationOf(20000, killNodes);
             }
         };
     }
